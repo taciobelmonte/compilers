@@ -1,6 +1,4 @@
-def main()
+//def add(x, y)
 {
-    var a;
-    a = 3;
-    return add(a, 2);
+    return x + y;
 }

@@ -496,14 +496,21 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "lexico.l"
-#line 2 "lexico.l"
+/*
+    Universidade Federal da Bahia
+    MATA61 - Compiladores
+    Professor: Roberto Parente
+    Alunos: Tácio Belmonte e Marino Souza
+    Analisador Léxico
+*/
+#line 11 "lexico.l"
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 
-int num_lines = 1;
+int lineNumber = 1;
 
-#line 507 "lex.yy.c"
+#line 514 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -685,10 +692,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 17 "lexico.l"
+#line 26 "lexico.l"
 
 
-#line 692 "lex.yy.c"
+#line 699 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -773,165 +780,165 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 19 "lexico.l"
+#line 28 "lexico.l"
 /*Ignora*/
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 20 "lexico.l"
-{printf("DEC \"%s\" %d \n", yytext, num_lines);}
+#line 29 "lexico.l"
+{fprintf(yyout,"DEC \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 21 "lexico.l"
-{printf("KEY \"%s\" %d \n", yytext, num_lines);}
+#line 30 "lexico.l"
+{fprintf(yyout,"KEY \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 22 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 31 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 23 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 32 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 24 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 33 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 25 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 34 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 26 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 35 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 27 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 36 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 28 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 37 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 29 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 38 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 30 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 39 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 31 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 40 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 32 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 41 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 33 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 42 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 34 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 43 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 35 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 44 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 36 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 45 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 37 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 46 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 38 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 47 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 39 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 48 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 40 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 49 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 41 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 50 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 42 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 51 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 43 "lexico.l"
-{printf("SYM \"%s\" %d \n", yytext, num_lines);}
+#line 52 "lexico.l"
+{fprintf(yyout,"SYM \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 44 "lexico.l"
-{printf("ID \"%s\" %d \n", yytext, num_lines);}
+#line 53 "lexico.l"
+{fprintf(yyout,"ID \"%s\" %d \n", yytext, lineNumber);}
 	YY_BREAK
 case 27:
 /* rule 27 can match eol */
 YY_RULE_SETUP
-#line 45 "lexico.l"
-{++num_lines;}
+#line 54 "lexico.l"
+{++lineNumber;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 46 "lexico.l"
+#line 55 "lexico.l"
 /*Remove espaços em branco*/
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 47 "lexico.l"
+#line 56 "lexico.l"
 /*Remove comentarios de uma linha*/
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 48 "lexico.l"
-{printf("\"%s\"\n", yytext);return -2;}
+#line 57 "lexico.l"
+{return -2;}
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 49 "lexico.l"
+#line 58 "lexico.l"
 {return -1;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 51 "lexico.l"
+#line 60 "lexico.l"
 ECHO;
 	YY_BREAK
-#line 935 "lex.yy.c"
+#line 942 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1926,7 +1933,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 51 "lexico.l"
+#line 60 "lexico.l"
 
 
 int yywrap();
@@ -1939,28 +1946,26 @@ int main(int argc, char** argv){
 	yyout = fopen( argv[2], "w" ); 
 
 	do{
-		token = yylex();
+            token = yylex();
 		
-		if(token == -1){
-           break;
+            if(token == -1){
+                break;
          }else if(token == -2){
+
+           //Imprime em caso de erro 
+           fprintf(yyout,"ERROR \"%s\" %d \n", yytext, lineNumber); 
            return 0;
          }
          else if(yyleng == 0){
-             printf("\n[ERRO] Lexema não pertence a linguagem.");
+             //printf("\n[ERRO] Lexema não pertence a linguagem.");
          }
-         else{
-           printf("identificou\n");
-       	}
-	
 	}while( token != EOF);
 
 	fclose(yyout);
-    fclose(yyin);
-	
+        fclose(yyin);
 	return 0;
 }
 
 int yywrap(){
-	return 1;
+    return 1;
 }
