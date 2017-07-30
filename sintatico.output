@@ -1,0 +1,545 @@
+Useless nonterminals
+
+   Atribuicao
+
+
+Terminals which are not used
+
+   UNOP
+   SYM
+   IF
+   ELSE
+   WHILE
+   ASSIGN
+   CONTINUE
+   BREAK
+
+
+Useless rules
+
+   32 Atribuicao: ID ASSIGN Expressao ENDEXPRESSION
+
+
+Rules never reduced
+
+   29 Expressao: /* empty */
+
+
+State 31 conflicts: 1 reduce/reduce
+
+
+Grammar
+
+    0 $accept: Inicio $end
+
+    1 @1: /* empty */
+
+    2 Inicio: @1 Programa
+
+    3 Programa: /* empty */
+    4         | DeclaraVariavel
+    5         | DeclaraFuncao
+
+    6 @2: /* empty */
+
+    7 @3: /* empty */
+
+    8 @4: /* empty */
+
+    9 @5: /* empty */
+
+   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco
+
+   11 @6: /* empty */
+
+   12 Bloco: OPENBLOCK @6 Conteudo CLOSEBLOCK
+
+   13 Conteudo: /* empty */
+   14         | DeclaraVariavel
+   15         | Statement
+
+   16 Parametros: /* empty */
+   17           | ID Parametros
+   18           | SEPARADOR ID Parametros
+
+   19 @7: /* empty */
+
+   20 @8: /* empty */
+
+   21 DeclaraVariavel: LET @7 Variaveis @8 ENDEXPRESSION
+
+   22 Variaveis: ID
+   23          | ID SEPARADOR Variaveis
+   24          | ID SEPARADOR
+
+   25 Statement: RETURN
+   26          | Expressao
+
+   27 @9: /* empty */
+
+   28 Statement: ID @9 ENDEXPRESSION
+
+   29 Expressao: /* empty */
+   30          | ID BINOP
+   31          | DEC BINOP DEC ENDEXPRESSION
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+BINOP (258) 30 31
+UNOP (259)
+SYM (260)
+DEC (261) 31
+DEF (262) 10
+RETURN (263) 25
+LET (264) 21
+IF (265)
+ELSE (266)
+WHILE (267)
+ASSIGN (268)
+CONTINUE (269)
+BREAK (270)
+OPENPAR (271) 10
+CLOSEPAR (272) 10
+OPENBLOCK (273) 12
+ENDEXPRESSION (274) 21 28 31
+SEPARADOR (275) 18 23 24
+CLOSEBLOCK (276) 12
+ID (277) 10 17 18 22 23 24 28 30
+
+
+Nonterminals, with rules where they appear
+
+$accept (23)
+    on left: 0
+Inicio (24)
+    on left: 2, on right: 0
+@1 (25)
+    on left: 1, on right: 2
+Programa (26)
+    on left: 3 4 5, on right: 2
+DeclaraFuncao (27)
+    on left: 10, on right: 5
+@2 (28)
+    on left: 6, on right: 10
+@3 (29)
+    on left: 7, on right: 10
+@4 (30)
+    on left: 8, on right: 10
+@5 (31)
+    on left: 9, on right: 10
+Bloco (32)
+    on left: 12, on right: 10
+@6 (33)
+    on left: 11, on right: 12
+Conteudo (34)
+    on left: 13 14 15, on right: 12
+Parametros (35)
+    on left: 16 17 18, on right: 10 17 18
+DeclaraVariavel (36)
+    on left: 21, on right: 4 14
+@7 (37)
+    on left: 19, on right: 21
+@8 (38)
+    on left: 20, on right: 21
+Variaveis (39)
+    on left: 22 23 24, on right: 21 23
+Statement (40)
+    on left: 25 26 28, on right: 15
+@9 (41)
+    on left: 27, on right: 28
+Expressao (42)
+    on left: 29 30 31, on right: 26
+
+
+state 0
+
+    0 $accept: . Inicio $end
+
+    $default  reduce using rule 1 (@1)
+
+    Inicio  go to state 1
+    @1      go to state 2
+
+
+state 1
+
+    0 $accept: Inicio . $end
+
+    $end  shift, and go to state 3
+
+
+state 2
+
+    2 Inicio: @1 . Programa
+
+    DEF  shift, and go to state 4
+    LET  shift, and go to state 5
+
+    $default  reduce using rule 3 (Programa)
+
+    Programa         go to state 6
+    DeclaraFuncao    go to state 7
+    DeclaraVariavel  go to state 8
+
+
+state 3
+
+    0 $accept: Inicio $end .
+
+    $default  accept
+
+
+state 4
+
+   10 DeclaraFuncao: DEF . ID @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco
+
+    ID  shift, and go to state 9
+
+
+state 5
+
+   21 DeclaraVariavel: LET . @7 Variaveis @8 ENDEXPRESSION
+
+    $default  reduce using rule 19 (@7)
+
+    @7  go to state 10
+
+
+state 6
+
+    2 Inicio: @1 Programa .
+
+    $default  reduce using rule 2 (Inicio)
+
+
+state 7
+
+    5 Programa: DeclaraFuncao .
+
+    $default  reduce using rule 5 (Programa)
+
+
+state 8
+
+    4 Programa: DeclaraVariavel .
+
+    $default  reduce using rule 4 (Programa)
+
+
+state 9
+
+   10 DeclaraFuncao: DEF ID . @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco
+
+    $default  reduce using rule 6 (@2)
+
+    @2  go to state 11
+
+
+state 10
+
+   21 DeclaraVariavel: LET @7 . Variaveis @8 ENDEXPRESSION
+
+    ID  shift, and go to state 12
+
+    Variaveis  go to state 13
+
+
+state 11
+
+   10 DeclaraFuncao: DEF ID @2 . OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco
+
+    OPENPAR  shift, and go to state 14
+
+
+state 12
+
+   22 Variaveis: ID .
+   23          | ID . SEPARADOR Variaveis
+   24          | ID . SEPARADOR
+
+    SEPARADOR  shift, and go to state 15
+
+    $default  reduce using rule 22 (Variaveis)
+
+
+state 13
+
+   21 DeclaraVariavel: LET @7 Variaveis . @8 ENDEXPRESSION
+
+    $default  reduce using rule 20 (@8)
+
+    @8  go to state 16
+
+
+state 14
+
+   10 DeclaraFuncao: DEF ID @2 OPENPAR . @3 Parametros @4 CLOSEPAR @5 Bloco
+
+    $default  reduce using rule 7 (@3)
+
+    @3  go to state 17
+
+
+state 15
+
+   23 Variaveis: ID SEPARADOR . Variaveis
+   24          | ID SEPARADOR .
+
+    ID  shift, and go to state 12
+
+    $default  reduce using rule 24 (Variaveis)
+
+    Variaveis  go to state 18
+
+
+state 16
+
+   21 DeclaraVariavel: LET @7 Variaveis @8 . ENDEXPRESSION
+
+    ENDEXPRESSION  shift, and go to state 19
+
+
+state 17
+
+   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 . Parametros @4 CLOSEPAR @5 Bloco
+
+    SEPARADOR  shift, and go to state 20
+    ID         shift, and go to state 21
+
+    $default  reduce using rule 16 (Parametros)
+
+    Parametros  go to state 22
+
+
+state 18
+
+   23 Variaveis: ID SEPARADOR Variaveis .
+
+    $default  reduce using rule 23 (Variaveis)
+
+
+state 19
+
+   21 DeclaraVariavel: LET @7 Variaveis @8 ENDEXPRESSION .
+
+    $default  reduce using rule 21 (DeclaraVariavel)
+
+
+state 20
+
+   18 Parametros: SEPARADOR . ID Parametros
+
+    ID  shift, and go to state 23
+
+
+state 21
+
+   17 Parametros: ID . Parametros
+
+    SEPARADOR  shift, and go to state 20
+    ID         shift, and go to state 21
+
+    $default  reduce using rule 16 (Parametros)
+
+    Parametros  go to state 24
+
+
+state 22
+
+   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros . @4 CLOSEPAR @5 Bloco
+
+    $default  reduce using rule 8 (@4)
+
+    @4  go to state 25
+
+
+state 23
+
+   18 Parametros: SEPARADOR ID . Parametros
+
+    SEPARADOR  shift, and go to state 20
+    ID         shift, and go to state 21
+
+    $default  reduce using rule 16 (Parametros)
+
+    Parametros  go to state 26
+
+
+state 24
+
+   17 Parametros: ID Parametros .
+
+    $default  reduce using rule 17 (Parametros)
+
+
+state 25
+
+   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 . CLOSEPAR @5 Bloco
+
+    CLOSEPAR  shift, and go to state 27
+
+
+state 26
+
+   18 Parametros: SEPARADOR ID Parametros .
+
+    $default  reduce using rule 18 (Parametros)
+
+
+state 27
+
+   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 CLOSEPAR . @5 Bloco
+
+    $default  reduce using rule 9 (@5)
+
+    @5  go to state 28
+
+
+state 28
+
+   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 . Bloco
+
+    OPENBLOCK  shift, and go to state 29
+
+    Bloco  go to state 30
+
+
+state 29
+
+   12 Bloco: OPENBLOCK . @6 Conteudo CLOSEBLOCK
+
+    $default  reduce using rule 11 (@6)
+
+    @6  go to state 31
+
+
+state 30
+
+   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco .
+
+    $default  reduce using rule 10 (DeclaraFuncao)
+
+
+state 31
+
+   12 Bloco: OPENBLOCK @6 . Conteudo CLOSEBLOCK
+
+    DEC     shift, and go to state 32
+    RETURN  shift, and go to state 33
+    LET     shift, and go to state 5
+    ID      shift, and go to state 34
+
+    CLOSEBLOCK  reduce using rule 13 (Conteudo)
+    CLOSEBLOCK  [reduce using rule 29 (Expressao)]
+    $default    reduce using rule 13 (Conteudo)
+
+    Conteudo         go to state 35
+    DeclaraVariavel  go to state 36
+    Statement        go to state 37
+    Expressao        go to state 38
+
+
+state 32
+
+   31 Expressao: DEC . BINOP DEC ENDEXPRESSION
+
+    BINOP  shift, and go to state 39
+
+
+state 33
+
+   25 Statement: RETURN .
+
+    $default  reduce using rule 25 (Statement)
+
+
+state 34
+
+   28 Statement: ID . @9 ENDEXPRESSION
+   30 Expressao: ID . BINOP
+
+    BINOP  shift, and go to state 40
+
+    $default  reduce using rule 27 (@9)
+
+    @9  go to state 41
+
+
+state 35
+
+   12 Bloco: OPENBLOCK @6 Conteudo . CLOSEBLOCK
+
+    CLOSEBLOCK  shift, and go to state 42
+
+
+state 36
+
+   14 Conteudo: DeclaraVariavel .
+
+    $default  reduce using rule 14 (Conteudo)
+
+
+state 37
+
+   15 Conteudo: Statement .
+
+    $default  reduce using rule 15 (Conteudo)
+
+
+state 38
+
+   26 Statement: Expressao .
+
+    $default  reduce using rule 26 (Statement)
+
+
+state 39
+
+   31 Expressao: DEC BINOP . DEC ENDEXPRESSION
+
+    DEC  shift, and go to state 43
+
+
+state 40
+
+   30 Expressao: ID BINOP .
+
+    $default  reduce using rule 30 (Expressao)
+
+
+state 41
+
+   28 Statement: ID @9 . ENDEXPRESSION
+
+    ENDEXPRESSION  shift, and go to state 44
+
+
+state 42
+
+   12 Bloco: OPENBLOCK @6 Conteudo CLOSEBLOCK .
+
+    $default  reduce using rule 12 (Bloco)
+
+
+state 43
+
+   31 Expressao: DEC BINOP DEC . ENDEXPRESSION
+
+    ENDEXPRESSION  shift, and go to state 45
+
+
+state 44
+
+   28 Statement: ID @9 ENDEXPRESSION .
+
+    $default  reduce using rule 28 (Statement)
+
+
+state 45
+
+   31 Expressao: DEC BINOP DEC ENDEXPRESSION .
+
+    $default  reduce using rule 31 (Expressao)
