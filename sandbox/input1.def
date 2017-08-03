@@ -1,0 +1,11 @@
+def add(x, y)
+{
+    return x + y;
+}
+
+def main()
+{
+    let a;
+    a = 3;
+    return add(a, 2);
+}
