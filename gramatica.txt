@@ -1,0 +1,44 @@
+P -> D P
+P -> B P
+P -> ' ' 
+D -> let ID ;
+D -> let ID = A ;
+B -> def ID ( )
+B -> def ID ( L )
+L -> ID F
+F -> ( , ID ) F
+G -> { D S M K }
+S -> D S
+K -> M K
+M -> C ;
+M -> E ;
+M -> if ( A ) G
+M -> if ( A ) G ( else G )
+M -> while ( A ) G
+M -> return ;
+M-> return A ;
+M -> break ;
+M -> continue ;
+C -> ID = A
+E -> ID ( )
+E -> ID ( F )
+F -> A G
+H -> , A H
+A -> A BINOP A
+A-> UNOP A
+A -> ( A )
+A -> E
+A ->DEC
+A -> ID
+
+
+P = Programa
+D = Decvar
+B = Decfunc
+A = Expr
+L = Paramlist
+G = Block
+M = Stmt
+C = Assign
+E = Funccall
+F = arglist

@@ -1,545 +1,1575 @@
-Useless nonterminals
-
-   Atribuicao
-
-
-Terminals which are not used
-
-   UNOP
-   SYM
-   IF
-   ELSE
-   WHILE
-   ASSIGN
-   CONTINUE
-   BREAK
-
-
-Useless rules
-
-   32 Atribuicao: ID ASSIGN Expressao ENDEXPRESSION
-
-
-Rules never reduced
-
-   29 Expressao: /* empty */
-
-
-State 31 conflicts: 1 reduce/reduce
-
-
 Grammar
 
-    0 $accept: Inicio $end
+    0 $accept: programa $end
 
-    1 @1: /* empty */
+    1 programa: inicio
 
-    2 Inicio: @1 Programa
+    2 inicio: decvar inicio
+    3       | decfunc inicio
+    4       | /* empty */
 
-    3 Programa: /* empty */
-    4         | DeclaraVariavel
-    5         | DeclaraFuncao
+    5 decvar: LET IDENTIFIER ENDEXPRESSION
+    6       | LET IDENTIFIER ASSIGN exp ENDEXPRESSION
 
-    6 @2: /* empty */
+    7 decfunc: DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco
+    8        | DEF IDENTIFIER OPENPAR CLOSEPAR bloco
 
-    7 @3: /* empty */
+    9 paramlist: IDENTIFIER looparams
 
-    8 @4: /* empty */
+   10 looparams: SEPARADOR IDENTIFIER looparams
+   11          | /* empty */
 
-    9 @5: /* empty */
+   12 bloco: OPENBLOCK loopdecvar loopstmts CLOSEBLOCK
 
-   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco
+   13 loopdecvar: decvar loopdecvar
+   14           | /* empty */
 
-   11 @6: /* empty */
+   15 loopstmts: stmt loopstmts
+   16          | /* empty */
 
-   12 Bloco: OPENBLOCK @6 Conteudo CLOSEBLOCK
+   17 stmt: declaracao ENDEXPRESSION
+   18     | IF OPENPAR exp CLOSEPAR bloco
+   19     | IF OPENPAR exp CLOSEPAR bloco ELSE bloco
+   20     | WHILE OPENPAR exp CLOSEPAR bloco
+   21     | RETURN exp ENDEXPRESSION
+   22     | RETURN ENDEXPRESSION
+   23     | BREAK ENDEXPRESSION
+   24     | CONTINUE ENDEXPRESSION
 
-   13 Conteudo: /* empty */
-   14         | DeclaraVariavel
-   15         | Statement
+   25 declaracao: assign
+   26           | funccall
 
-   16 Parametros: /* empty */
-   17           | ID Parametros
-   18           | SEPARADOR ID Parametros
+   27 assign: IDENTIFIER ASSIGN exp
 
-   19 @7: /* empty */
+   28 funccall: IDENTIFIER OPENPAR arglist CLOSEPAR
+   29         | IDENTIFIER OPENPAR CLOSEPAR
 
-   20 @8: /* empty */
+   30 arglist: exp loopargs
 
-   21 DeclaraVariavel: LET @7 Variaveis @8 ENDEXPRESSION
+   31 loopargs: SEPARADOR exp loopargs
+   32         | /* empty */
 
-   22 Variaveis: ID
-   23          | ID SEPARADOR Variaveis
-   24          | ID SEPARADOR
-
-   25 Statement: RETURN
-   26          | Expressao
-
-   27 @9: /* empty */
-
-   28 Statement: ID @9 ENDEXPRESSION
-
-   29 Expressao: /* empty */
-   30          | ID BINOP
-   31          | DEC BINOP DEC ENDEXPRESSION
+   33 exp: exp PLUS exp
+   34    | exp MINUS exp
+   35    | exp MULT exp
+   36    | exp DIV exp
+   37    | exp LESS exp
+   38    | exp LESSEQUAL exp
+   39    | exp GREAT exp
+   40    | exp GREATEQUAL exp
+   41    | exp EQUAL exp
+   42    | exp DIFF exp
+   43    | exp AND exp
+   44    | exp OR exp
+   45    | MINUS exp
+   46    | NOT exp
+   47    | OPENPAR exp CLOSEPAR
+   48    | funccall
+   49    | DEC
+   50    | IDENTIFIER
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-BINOP (258) 30 31
-UNOP (259)
-SYM (260)
-DEC (261) 31
-DEF (262) 10
-RETURN (263) 25
-LET (264) 21
-IF (265)
-ELSE (266)
-WHILE (267)
-ASSIGN (268)
-CONTINUE (269)
-BREAK (270)
-OPENPAR (271) 10
-CLOSEPAR (272) 10
-OPENBLOCK (273) 12
-ENDEXPRESSION (274) 21 28 31
-SEPARADOR (275) 18 23 24
-CLOSEBLOCK (276) 12
-ID (277) 10 17 18 22 23 24 28 30
+DEC (258) 49
+DEF (259) 7 8
+RETURN (260) 21 22
+LET (261) 5 6
+IF (262) 18 19
+ELSE (263) 19
+WHILE (264) 20
+ASSIGN (265) 6 27
+CONTINUE (266) 24
+BREAK (267) 23
+OPENPAR (268) 7 8 18 19 20 28 29 47
+CLOSEPAR (269) 7 8 18 19 20 28 29 47
+OPENBLOCK (270) 12
+CLOSEBLOCK (271) 12
+ENDEXPRESSION (272) 5 6 17 21 22 23 24
+SEPARADOR (273) 10 31
+IDENTIFIER (274) 5 6 7 8 9 10 27 28 29 50
+OR (275) 44
+AND (276) 43
+EQUAL (277) 41
+DIFF (278) 42
+LESS (279) 37
+LESSEQUAL (280) 38
+GREATEQUAL (281) 40
+GREAT (282) 39
+PLUS (283) 33
+MINUS (284) 34 45
+MULT (285) 35
+DIV (286) 36
+NOT (287) 46
+UMINUS (288)
 
 
 Nonterminals, with rules where they appear
 
-$accept (23)
+$accept (34)
     on left: 0
-Inicio (24)
-    on left: 2, on right: 0
-@1 (25)
-    on left: 1, on right: 2
-Programa (26)
-    on left: 3 4 5, on right: 2
-DeclaraFuncao (27)
-    on left: 10, on right: 5
-@2 (28)
-    on left: 6, on right: 10
-@3 (29)
-    on left: 7, on right: 10
-@4 (30)
-    on left: 8, on right: 10
-@5 (31)
-    on left: 9, on right: 10
-Bloco (32)
-    on left: 12, on right: 10
-@6 (33)
-    on left: 11, on right: 12
-Conteudo (34)
-    on left: 13 14 15, on right: 12
-Parametros (35)
-    on left: 16 17 18, on right: 10 17 18
-DeclaraVariavel (36)
-    on left: 21, on right: 4 14
-@7 (37)
-    on left: 19, on right: 21
-@8 (38)
-    on left: 20, on right: 21
-Variaveis (39)
-    on left: 22 23 24, on right: 21 23
-Statement (40)
-    on left: 25 26 28, on right: 15
-@9 (41)
-    on left: 27, on right: 28
-Expressao (42)
-    on left: 29 30 31, on right: 26
+programa (35)
+    on left: 1, on right: 0
+inicio (36)
+    on left: 2 3 4, on right: 1 2 3
+decvar (37)
+    on left: 5 6, on right: 2 13
+decfunc (38)
+    on left: 7 8, on right: 3
+paramlist (39)
+    on left: 9, on right: 7
+looparams (40)
+    on left: 10 11, on right: 9 10
+bloco (41)
+    on left: 12, on right: 7 8 18 19 20
+loopdecvar (42)
+    on left: 13 14, on right: 12 13
+loopstmts (43)
+    on left: 15 16, on right: 12 15
+stmt (44)
+    on left: 17 18 19 20 21 22 23 24, on right: 15
+declaracao (45)
+    on left: 25 26, on right: 17
+assign (46)
+    on left: 27, on right: 25
+funccall (47)
+    on left: 28 29, on right: 26 48
+arglist (48)
+    on left: 30, on right: 28
+loopargs (49)
+    on left: 31 32, on right: 30 31
+exp (50)
+    on left: 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50,
+    on right: 6 18 19 20 21 27 30 31 33 34 35 36 37 38 39 40 41 42
+    43 44 45 46 47
 
 
 state 0
 
-    0 $accept: . Inicio $end
+    0 $accept: . programa $end
 
-    $default  reduce using rule 1 (@1)
+    DEF  shift, and go to state 1
+    LET  shift, and go to state 2
 
-    Inicio  go to state 1
-    @1      go to state 2
+    $default  reduce using rule 4 (inicio)
+
+    programa  go to state 3
+    inicio    go to state 4
+    decvar    go to state 5
+    decfunc   go to state 6
 
 
 state 1
 
-    0 $accept: Inicio . $end
+    7 decfunc: DEF . IDENTIFIER OPENPAR paramlist CLOSEPAR bloco
+    8        | DEF . IDENTIFIER OPENPAR CLOSEPAR bloco
 
-    $end  shift, and go to state 3
+    IDENTIFIER  shift, and go to state 7
 
 
 state 2
 
-    2 Inicio: @1 . Programa
+    5 decvar: LET . IDENTIFIER ENDEXPRESSION
+    6       | LET . IDENTIFIER ASSIGN exp ENDEXPRESSION
 
-    DEF  shift, and go to state 4
-    LET  shift, and go to state 5
-
-    $default  reduce using rule 3 (Programa)
-
-    Programa         go to state 6
-    DeclaraFuncao    go to state 7
-    DeclaraVariavel  go to state 8
+    IDENTIFIER  shift, and go to state 8
 
 
 state 3
 
-    0 $accept: Inicio $end .
+    0 $accept: programa . $end
 
-    $default  accept
+    $end  shift, and go to state 9
 
 
 state 4
 
-   10 DeclaraFuncao: DEF . ID @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco
+    1 programa: inicio .
 
-    ID  shift, and go to state 9
+    $default  reduce using rule 1 (programa)
 
 
 state 5
 
-   21 DeclaraVariavel: LET . @7 Variaveis @8 ENDEXPRESSION
+    2 inicio: decvar . inicio
 
-    $default  reduce using rule 19 (@7)
+    DEF  shift, and go to state 1
+    LET  shift, and go to state 2
 
-    @7  go to state 10
+    $default  reduce using rule 4 (inicio)
+
+    inicio   go to state 10
+    decvar   go to state 5
+    decfunc  go to state 6
 
 
 state 6
 
-    2 Inicio: @1 Programa .
+    3 inicio: decfunc . inicio
 
-    $default  reduce using rule 2 (Inicio)
+    DEF  shift, and go to state 1
+    LET  shift, and go to state 2
+
+    $default  reduce using rule 4 (inicio)
+
+    inicio   go to state 11
+    decvar   go to state 5
+    decfunc  go to state 6
 
 
 state 7
 
-    5 Programa: DeclaraFuncao .
+    7 decfunc: DEF IDENTIFIER . OPENPAR paramlist CLOSEPAR bloco
+    8        | DEF IDENTIFIER . OPENPAR CLOSEPAR bloco
 
-    $default  reduce using rule 5 (Programa)
+    OPENPAR  shift, and go to state 12
 
 
 state 8
 
-    4 Programa: DeclaraVariavel .
+    5 decvar: LET IDENTIFIER . ENDEXPRESSION
+    6       | LET IDENTIFIER . ASSIGN exp ENDEXPRESSION
 
-    $default  reduce using rule 4 (Programa)
+    ASSIGN         shift, and go to state 13
+    ENDEXPRESSION  shift, and go to state 14
 
 
 state 9
 
-   10 DeclaraFuncao: DEF ID . @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco
+    0 $accept: programa $end .
 
-    $default  reduce using rule 6 (@2)
-
-    @2  go to state 11
+    $default  accept
 
 
 state 10
 
-   21 DeclaraVariavel: LET @7 . Variaveis @8 ENDEXPRESSION
+    2 inicio: decvar inicio .
 
-    ID  shift, and go to state 12
-
-    Variaveis  go to state 13
+    $default  reduce using rule 2 (inicio)
 
 
 state 11
 
-   10 DeclaraFuncao: DEF ID @2 . OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco
+    3 inicio: decfunc inicio .
 
-    OPENPAR  shift, and go to state 14
+    $default  reduce using rule 3 (inicio)
 
 
 state 12
 
-   22 Variaveis: ID .
-   23          | ID . SEPARADOR Variaveis
-   24          | ID . SEPARADOR
+    7 decfunc: DEF IDENTIFIER OPENPAR . paramlist CLOSEPAR bloco
+    8        | DEF IDENTIFIER OPENPAR . CLOSEPAR bloco
 
-    SEPARADOR  shift, and go to state 15
+    CLOSEPAR    shift, and go to state 15
+    IDENTIFIER  shift, and go to state 16
 
-    $default  reduce using rule 22 (Variaveis)
+    paramlist  go to state 17
 
 
 state 13
 
-   21 DeclaraVariavel: LET @7 Variaveis . @8 ENDEXPRESSION
+    6 decvar: LET IDENTIFIER ASSIGN . exp ENDEXPRESSION
 
-    $default  reduce using rule 20 (@8)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
 
-    @8  go to state 16
+    funccall  go to state 23
+    exp       go to state 24
 
 
 state 14
 
-   10 DeclaraFuncao: DEF ID @2 OPENPAR . @3 Parametros @4 CLOSEPAR @5 Bloco
+    5 decvar: LET IDENTIFIER ENDEXPRESSION .
 
-    $default  reduce using rule 7 (@3)
-
-    @3  go to state 17
+    $default  reduce using rule 5 (decvar)
 
 
 state 15
 
-   23 Variaveis: ID SEPARADOR . Variaveis
-   24          | ID SEPARADOR .
+    8 decfunc: DEF IDENTIFIER OPENPAR CLOSEPAR . bloco
 
-    ID  shift, and go to state 12
+    OPENBLOCK  shift, and go to state 25
 
-    $default  reduce using rule 24 (Variaveis)
-
-    Variaveis  go to state 18
+    bloco  go to state 26
 
 
 state 16
 
-   21 DeclaraVariavel: LET @7 Variaveis @8 . ENDEXPRESSION
+    9 paramlist: IDENTIFIER . looparams
 
-    ENDEXPRESSION  shift, and go to state 19
+    SEPARADOR  shift, and go to state 27
+
+    $default  reduce using rule 11 (looparams)
+
+    looparams  go to state 28
 
 
 state 17
 
-   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 . Parametros @4 CLOSEPAR @5 Bloco
+    7 decfunc: DEF IDENTIFIER OPENPAR paramlist . CLOSEPAR bloco
 
-    SEPARADOR  shift, and go to state 20
-    ID         shift, and go to state 21
-
-    $default  reduce using rule 16 (Parametros)
-
-    Parametros  go to state 22
+    CLOSEPAR  shift, and go to state 29
 
 
 state 18
 
-   23 Variaveis: ID SEPARADOR Variaveis .
+   49 exp: DEC .
 
-    $default  reduce using rule 23 (Variaveis)
+    $default  reduce using rule 49 (exp)
 
 
 state 19
 
-   21 DeclaraVariavel: LET @7 Variaveis @8 ENDEXPRESSION .
+   47 exp: OPENPAR . exp CLOSEPAR
 
-    $default  reduce using rule 21 (DeclaraVariavel)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 30
 
 
 state 20
 
-   18 Parametros: SEPARADOR . ID Parametros
+   28 funccall: IDENTIFIER . OPENPAR arglist CLOSEPAR
+   29         | IDENTIFIER . OPENPAR CLOSEPAR
+   50 exp: IDENTIFIER .
 
-    ID  shift, and go to state 23
+    OPENPAR  shift, and go to state 31
+
+    $default  reduce using rule 50 (exp)
 
 
 state 21
 
-   17 Parametros: ID . Parametros
+   45 exp: MINUS . exp
 
-    SEPARADOR  shift, and go to state 20
-    ID         shift, and go to state 21
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
 
-    $default  reduce using rule 16 (Parametros)
-
-    Parametros  go to state 24
+    funccall  go to state 23
+    exp       go to state 32
 
 
 state 22
 
-   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros . @4 CLOSEPAR @5 Bloco
+   46 exp: NOT . exp
 
-    $default  reduce using rule 8 (@4)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
 
-    @4  go to state 25
+    funccall  go to state 23
+    exp       go to state 33
 
 
 state 23
 
-   18 Parametros: SEPARADOR ID . Parametros
+   48 exp: funccall .
 
-    SEPARADOR  shift, and go to state 20
-    ID         shift, and go to state 21
-
-    $default  reduce using rule 16 (Parametros)
-
-    Parametros  go to state 26
+    $default  reduce using rule 48 (exp)
 
 
 state 24
 
-   17 Parametros: ID Parametros .
+    6 decvar: LET IDENTIFIER ASSIGN exp . ENDEXPRESSION
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
 
-    $default  reduce using rule 17 (Parametros)
+    ENDEXPRESSION  shift, and go to state 34
+    OR             shift, and go to state 35
+    AND            shift, and go to state 36
+    EQUAL          shift, and go to state 37
+    DIFF           shift, and go to state 38
+    LESS           shift, and go to state 39
+    LESSEQUAL      shift, and go to state 40
+    GREATEQUAL     shift, and go to state 41
+    GREAT          shift, and go to state 42
+    PLUS           shift, and go to state 43
+    MINUS          shift, and go to state 44
+    MULT           shift, and go to state 45
+    DIV            shift, and go to state 46
 
 
 state 25
 
-   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 . CLOSEPAR @5 Bloco
+   12 bloco: OPENBLOCK . loopdecvar loopstmts CLOSEBLOCK
 
-    CLOSEPAR  shift, and go to state 27
+    LET  shift, and go to state 2
+
+    $default  reduce using rule 14 (loopdecvar)
+
+    decvar      go to state 47
+    loopdecvar  go to state 48
 
 
 state 26
 
-   18 Parametros: SEPARADOR ID Parametros .
+    8 decfunc: DEF IDENTIFIER OPENPAR CLOSEPAR bloco .
 
-    $default  reduce using rule 18 (Parametros)
+    $default  reduce using rule 8 (decfunc)
 
 
 state 27
 
-   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 CLOSEPAR . @5 Bloco
+   10 looparams: SEPARADOR . IDENTIFIER looparams
 
-    $default  reduce using rule 9 (@5)
-
-    @5  go to state 28
+    IDENTIFIER  shift, and go to state 49
 
 
 state 28
 
-   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 . Bloco
+    9 paramlist: IDENTIFIER looparams .
 
-    OPENBLOCK  shift, and go to state 29
-
-    Bloco  go to state 30
+    $default  reduce using rule 9 (paramlist)
 
 
 state 29
 
-   12 Bloco: OPENBLOCK . @6 Conteudo CLOSEBLOCK
+    7 decfunc: DEF IDENTIFIER OPENPAR paramlist CLOSEPAR . bloco
 
-    $default  reduce using rule 11 (@6)
+    OPENBLOCK  shift, and go to state 25
 
-    @6  go to state 31
+    bloco  go to state 50
 
 
 state 30
 
-   10 DeclaraFuncao: DEF ID @2 OPENPAR @3 Parametros @4 CLOSEPAR @5 Bloco .
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+   47    | OPENPAR exp . CLOSEPAR
 
-    $default  reduce using rule 10 (DeclaraFuncao)
+    CLOSEPAR    shift, and go to state 51
+    OR          shift, and go to state 35
+    AND         shift, and go to state 36
+    EQUAL       shift, and go to state 37
+    DIFF        shift, and go to state 38
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
 
 
 state 31
 
-   12 Bloco: OPENBLOCK @6 . Conteudo CLOSEBLOCK
+   28 funccall: IDENTIFIER OPENPAR . arglist CLOSEPAR
+   29         | IDENTIFIER OPENPAR . CLOSEPAR
 
-    DEC     shift, and go to state 32
-    RETURN  shift, and go to state 33
-    LET     shift, and go to state 5
-    ID      shift, and go to state 34
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    CLOSEPAR    shift, and go to state 52
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
 
-    CLOSEBLOCK  reduce using rule 13 (Conteudo)
-    CLOSEBLOCK  [reduce using rule 29 (Expressao)]
-    $default    reduce using rule 13 (Conteudo)
-
-    Conteudo         go to state 35
-    DeclaraVariavel  go to state 36
-    Statement        go to state 37
-    Expressao        go to state 38
+    funccall  go to state 23
+    arglist   go to state 53
+    exp       go to state 54
 
 
 state 32
 
-   31 Expressao: DEC . BINOP DEC ENDEXPRESSION
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+   45    | MINUS exp .
 
-    BINOP  shift, and go to state 39
+    $default  reduce using rule 45 (exp)
 
 
 state 33
 
-   25 Statement: RETURN .
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+   46    | NOT exp .
 
-    $default  reduce using rule 25 (Statement)
+    $default  reduce using rule 46 (exp)
 
 
 state 34
 
-   28 Statement: ID . @9 ENDEXPRESSION
-   30 Expressao: ID . BINOP
+    6 decvar: LET IDENTIFIER ASSIGN exp ENDEXPRESSION .
 
-    BINOP  shift, and go to state 40
-
-    $default  reduce using rule 27 (@9)
-
-    @9  go to state 41
+    $default  reduce using rule 6 (decvar)
 
 
 state 35
 
-   12 Bloco: OPENBLOCK @6 Conteudo . CLOSEBLOCK
+   44 exp: exp OR . exp
 
-    CLOSEBLOCK  shift, and go to state 42
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 55
 
 
 state 36
 
-   14 Conteudo: DeclaraVariavel .
+   43 exp: exp AND . exp
 
-    $default  reduce using rule 14 (Conteudo)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 56
 
 
 state 37
 
-   15 Conteudo: Statement .
+   41 exp: exp EQUAL . exp
 
-    $default  reduce using rule 15 (Conteudo)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 57
 
 
 state 38
 
-   26 Statement: Expressao .
+   42 exp: exp DIFF . exp
 
-    $default  reduce using rule 26 (Statement)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 58
 
 
 state 39
 
-   31 Expressao: DEC BINOP . DEC ENDEXPRESSION
+   37 exp: exp LESS . exp
 
-    DEC  shift, and go to state 43
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 59
 
 
 state 40
 
-   30 Expressao: ID BINOP .
+   38 exp: exp LESSEQUAL . exp
 
-    $default  reduce using rule 30 (Expressao)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 60
 
 
 state 41
 
-   28 Statement: ID @9 . ENDEXPRESSION
+   40 exp: exp GREATEQUAL . exp
 
-    ENDEXPRESSION  shift, and go to state 44
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 61
 
 
 state 42
 
-   12 Bloco: OPENBLOCK @6 Conteudo CLOSEBLOCK .
+   39 exp: exp GREAT . exp
 
-    $default  reduce using rule 12 (Bloco)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 62
 
 
 state 43
 
-   31 Expressao: DEC BINOP DEC . ENDEXPRESSION
+   33 exp: exp PLUS . exp
 
-    ENDEXPRESSION  shift, and go to state 45
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 63
 
 
 state 44
 
-   28 Statement: ID @9 ENDEXPRESSION .
+   34 exp: exp MINUS . exp
 
-    $default  reduce using rule 28 (Statement)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 64
 
 
 state 45
 
-   31 Expressao: DEC BINOP DEC ENDEXPRESSION .
+   35 exp: exp MULT . exp
 
-    $default  reduce using rule 31 (Expressao)
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 65
+
+
+state 46
+
+   36 exp: exp DIV . exp
+
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 66
+
+
+state 47
+
+   13 loopdecvar: decvar . loopdecvar
+
+    LET  shift, and go to state 2
+
+    $default  reduce using rule 14 (loopdecvar)
+
+    decvar      go to state 47
+    loopdecvar  go to state 67
+
+
+state 48
+
+   12 bloco: OPENBLOCK loopdecvar . loopstmts CLOSEBLOCK
+
+    RETURN      shift, and go to state 68
+    IF          shift, and go to state 69
+    WHILE       shift, and go to state 70
+    CONTINUE    shift, and go to state 71
+    BREAK       shift, and go to state 72
+    IDENTIFIER  shift, and go to state 73
+
+    $default  reduce using rule 16 (loopstmts)
+
+    loopstmts   go to state 74
+    stmt        go to state 75
+    declaracao  go to state 76
+    assign      go to state 77
+    funccall    go to state 78
+
+
+state 49
+
+   10 looparams: SEPARADOR IDENTIFIER . looparams
+
+    SEPARADOR  shift, and go to state 27
+
+    $default  reduce using rule 11 (looparams)
+
+    looparams  go to state 79
+
+
+state 50
+
+    7 decfunc: DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco .
+
+    $default  reduce using rule 7 (decfunc)
+
+
+state 51
+
+   47 exp: OPENPAR exp CLOSEPAR .
+
+    $default  reduce using rule 47 (exp)
+
+
+state 52
+
+   29 funccall: IDENTIFIER OPENPAR CLOSEPAR .
+
+    $default  reduce using rule 29 (funccall)
+
+
+state 53
+
+   28 funccall: IDENTIFIER OPENPAR arglist . CLOSEPAR
+
+    CLOSEPAR  shift, and go to state 80
+
+
+state 54
+
+   30 arglist: exp . loopargs
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    SEPARADOR   shift, and go to state 81
+    OR          shift, and go to state 35
+    AND         shift, and go to state 36
+    EQUAL       shift, and go to state 37
+    DIFF        shift, and go to state 38
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+    $default  reduce using rule 32 (loopargs)
+
+    loopargs  go to state 82
+
+
+state 55
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+   44    | exp OR exp .
+
+    AND         shift, and go to state 36
+    EQUAL       shift, and go to state 37
+    DIFF        shift, and go to state 38
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+    $default  reduce using rule 44 (exp)
+
+
+state 56
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   43    | exp AND exp .
+   44    | exp . OR exp
+
+    EQUAL       shift, and go to state 37
+    DIFF        shift, and go to state 38
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+    $default  reduce using rule 43 (exp)
+
+
+state 57
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   41    | exp EQUAL exp .
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+    $default  reduce using rule 41 (exp)
+
+
+state 58
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   42    | exp DIFF exp .
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+    $default  reduce using rule 42 (exp)
+
+
+state 59
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   37    | exp LESS exp .
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    PLUS   shift, and go to state 43
+    MINUS  shift, and go to state 44
+    MULT   shift, and go to state 45
+    DIV    shift, and go to state 46
+
+    $default  reduce using rule 37 (exp)
+
+
+state 60
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   38    | exp LESSEQUAL exp .
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    PLUS   shift, and go to state 43
+    MINUS  shift, and go to state 44
+    MULT   shift, and go to state 45
+    DIV    shift, and go to state 46
+
+    $default  reduce using rule 38 (exp)
+
+
+state 61
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   40    | exp GREATEQUAL exp .
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    PLUS   shift, and go to state 43
+    MINUS  shift, and go to state 44
+    MULT   shift, and go to state 45
+    DIV    shift, and go to state 46
+
+    $default  reduce using rule 40 (exp)
+
+
+state 62
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   39    | exp GREAT exp .
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    PLUS   shift, and go to state 43
+    MINUS  shift, and go to state 44
+    MULT   shift, and go to state 45
+    DIV    shift, and go to state 46
+
+    $default  reduce using rule 39 (exp)
+
+
+state 63
+
+   33 exp: exp . PLUS exp
+   33    | exp PLUS exp .
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    MULT  shift, and go to state 45
+    DIV   shift, and go to state 46
+
+    $default  reduce using rule 33 (exp)
+
+
+state 64
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   34    | exp MINUS exp .
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    MULT  shift, and go to state 45
+    DIV   shift, and go to state 46
+
+    $default  reduce using rule 34 (exp)
+
+
+state 65
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   35    | exp MULT exp .
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    $default  reduce using rule 35 (exp)
+
+
+state 66
+
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   36    | exp DIV exp .
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    $default  reduce using rule 36 (exp)
+
+
+state 67
+
+   13 loopdecvar: decvar loopdecvar .
+
+    $default  reduce using rule 13 (loopdecvar)
+
+
+state 68
+
+   21 stmt: RETURN . exp ENDEXPRESSION
+   22     | RETURN . ENDEXPRESSION
+
+    DEC            shift, and go to state 18
+    OPENPAR        shift, and go to state 19
+    ENDEXPRESSION  shift, and go to state 83
+    IDENTIFIER     shift, and go to state 20
+    MINUS          shift, and go to state 21
+    NOT            shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 84
+
+
+state 69
+
+   18 stmt: IF . OPENPAR exp CLOSEPAR bloco
+   19     | IF . OPENPAR exp CLOSEPAR bloco ELSE bloco
+
+    OPENPAR  shift, and go to state 85
+
+
+state 70
+
+   20 stmt: WHILE . OPENPAR exp CLOSEPAR bloco
+
+    OPENPAR  shift, and go to state 86
+
+
+state 71
+
+   24 stmt: CONTINUE . ENDEXPRESSION
+
+    ENDEXPRESSION  shift, and go to state 87
+
+
+state 72
+
+   23 stmt: BREAK . ENDEXPRESSION
+
+    ENDEXPRESSION  shift, and go to state 88
+
+
+state 73
+
+   27 assign: IDENTIFIER . ASSIGN exp
+   28 funccall: IDENTIFIER . OPENPAR arglist CLOSEPAR
+   29         | IDENTIFIER . OPENPAR CLOSEPAR
+
+    ASSIGN   shift, and go to state 89
+    OPENPAR  shift, and go to state 31
+
+
+state 74
+
+   12 bloco: OPENBLOCK loopdecvar loopstmts . CLOSEBLOCK
+
+    CLOSEBLOCK  shift, and go to state 90
+
+
+state 75
+
+   15 loopstmts: stmt . loopstmts
+
+    RETURN      shift, and go to state 68
+    IF          shift, and go to state 69
+    WHILE       shift, and go to state 70
+    CONTINUE    shift, and go to state 71
+    BREAK       shift, and go to state 72
+    IDENTIFIER  shift, and go to state 73
+
+    $default  reduce using rule 16 (loopstmts)
+
+    loopstmts   go to state 91
+    stmt        go to state 75
+    declaracao  go to state 76
+    assign      go to state 77
+    funccall    go to state 78
+
+
+state 76
+
+   17 stmt: declaracao . ENDEXPRESSION
+
+    ENDEXPRESSION  shift, and go to state 92
+
+
+state 77
+
+   25 declaracao: assign .
+
+    $default  reduce using rule 25 (declaracao)
+
+
+state 78
+
+   26 declaracao: funccall .
+
+    $default  reduce using rule 26 (declaracao)
+
+
+state 79
+
+   10 looparams: SEPARADOR IDENTIFIER looparams .
+
+    $default  reduce using rule 10 (looparams)
+
+
+state 80
+
+   28 funccall: IDENTIFIER OPENPAR arglist CLOSEPAR .
+
+    $default  reduce using rule 28 (funccall)
+
+
+state 81
+
+   31 loopargs: SEPARADOR . exp loopargs
+
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 93
+
+
+state 82
+
+   30 arglist: exp loopargs .
+
+    $default  reduce using rule 30 (arglist)
+
+
+state 83
+
+   22 stmt: RETURN ENDEXPRESSION .
+
+    $default  reduce using rule 22 (stmt)
+
+
+state 84
+
+   21 stmt: RETURN exp . ENDEXPRESSION
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    ENDEXPRESSION  shift, and go to state 94
+    OR             shift, and go to state 35
+    AND            shift, and go to state 36
+    EQUAL          shift, and go to state 37
+    DIFF           shift, and go to state 38
+    LESS           shift, and go to state 39
+    LESSEQUAL      shift, and go to state 40
+    GREATEQUAL     shift, and go to state 41
+    GREAT          shift, and go to state 42
+    PLUS           shift, and go to state 43
+    MINUS          shift, and go to state 44
+    MULT           shift, and go to state 45
+    DIV            shift, and go to state 46
+
+
+state 85
+
+   18 stmt: IF OPENPAR . exp CLOSEPAR bloco
+   19     | IF OPENPAR . exp CLOSEPAR bloco ELSE bloco
+
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 95
+
+
+state 86
+
+   20 stmt: WHILE OPENPAR . exp CLOSEPAR bloco
+
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 96
+
+
+state 87
+
+   24 stmt: CONTINUE ENDEXPRESSION .
+
+    $default  reduce using rule 24 (stmt)
+
+
+state 88
+
+   23 stmt: BREAK ENDEXPRESSION .
+
+    $default  reduce using rule 23 (stmt)
+
+
+state 89
+
+   27 assign: IDENTIFIER ASSIGN . exp
+
+    DEC         shift, and go to state 18
+    OPENPAR     shift, and go to state 19
+    IDENTIFIER  shift, and go to state 20
+    MINUS       shift, and go to state 21
+    NOT         shift, and go to state 22
+
+    funccall  go to state 23
+    exp       go to state 97
+
+
+state 90
+
+   12 bloco: OPENBLOCK loopdecvar loopstmts CLOSEBLOCK .
+
+    $default  reduce using rule 12 (bloco)
+
+
+state 91
+
+   15 loopstmts: stmt loopstmts .
+
+    $default  reduce using rule 15 (loopstmts)
+
+
+state 92
+
+   17 stmt: declaracao ENDEXPRESSION .
+
+    $default  reduce using rule 17 (stmt)
+
+
+state 93
+
+   31 loopargs: SEPARADOR exp . loopargs
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    SEPARADOR   shift, and go to state 81
+    OR          shift, and go to state 35
+    AND         shift, and go to state 36
+    EQUAL       shift, and go to state 37
+    DIFF        shift, and go to state 38
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+    $default  reduce using rule 32 (loopargs)
+
+    loopargs  go to state 98
+
+
+state 94
+
+   21 stmt: RETURN exp ENDEXPRESSION .
+
+    $default  reduce using rule 21 (stmt)
+
+
+state 95
+
+   18 stmt: IF OPENPAR exp . CLOSEPAR bloco
+   19     | IF OPENPAR exp . CLOSEPAR bloco ELSE bloco
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    CLOSEPAR    shift, and go to state 99
+    OR          shift, and go to state 35
+    AND         shift, and go to state 36
+    EQUAL       shift, and go to state 37
+    DIFF        shift, and go to state 38
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+
+state 96
+
+   20 stmt: WHILE OPENPAR exp . CLOSEPAR bloco
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    CLOSEPAR    shift, and go to state 100
+    OR          shift, and go to state 35
+    AND         shift, and go to state 36
+    EQUAL       shift, and go to state 37
+    DIFF        shift, and go to state 38
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+
+state 97
+
+   27 assign: IDENTIFIER ASSIGN exp .
+   33 exp: exp . PLUS exp
+   34    | exp . MINUS exp
+   35    | exp . MULT exp
+   36    | exp . DIV exp
+   37    | exp . LESS exp
+   38    | exp . LESSEQUAL exp
+   39    | exp . GREAT exp
+   40    | exp . GREATEQUAL exp
+   41    | exp . EQUAL exp
+   42    | exp . DIFF exp
+   43    | exp . AND exp
+   44    | exp . OR exp
+
+    OR          shift, and go to state 35
+    AND         shift, and go to state 36
+    EQUAL       shift, and go to state 37
+    DIFF        shift, and go to state 38
+    LESS        shift, and go to state 39
+    LESSEQUAL   shift, and go to state 40
+    GREATEQUAL  shift, and go to state 41
+    GREAT       shift, and go to state 42
+    PLUS        shift, and go to state 43
+    MINUS       shift, and go to state 44
+    MULT        shift, and go to state 45
+    DIV         shift, and go to state 46
+
+    $default  reduce using rule 27 (assign)
+
+
+state 98
+
+   31 loopargs: SEPARADOR exp loopargs .
+
+    $default  reduce using rule 31 (loopargs)
+
+
+state 99
+
+   18 stmt: IF OPENPAR exp CLOSEPAR . bloco
+   19     | IF OPENPAR exp CLOSEPAR . bloco ELSE bloco
+
+    OPENBLOCK  shift, and go to state 25
+
+    bloco  go to state 101
+
+
+state 100
+
+   20 stmt: WHILE OPENPAR exp CLOSEPAR . bloco
+
+    OPENBLOCK  shift, and go to state 25
+
+    bloco  go to state 102
+
+
+state 101
+
+   18 stmt: IF OPENPAR exp CLOSEPAR bloco .
+   19     | IF OPENPAR exp CLOSEPAR bloco . ELSE bloco
+
+    ELSE  shift, and go to state 103
+
+    $default  reduce using rule 18 (stmt)
+
+
+state 102
+
+   20 stmt: WHILE OPENPAR exp CLOSEPAR bloco .
+
+    $default  reduce using rule 20 (stmt)
+
+
+state 103
+
+   19 stmt: IF OPENPAR exp CLOSEPAR bloco ELSE . bloco
+
+    OPENBLOCK  shift, and go to state 25
+
+    bloco  go to state 104
+
+
+state 104
+
+   19 stmt: IF OPENPAR exp CLOSEPAR bloco ELSE bloco .
+
+    $default  reduce using rule 19 (stmt)

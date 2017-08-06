@@ -11,7 +11,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include "library.h"
 #include "sintatico.h"
+
 
 int lineNumber = 1;
 
@@ -32,8 +34,19 @@ errodiferente   ({digito})+(_|{letra}|{digito})*
                                                                                                                         yylval.intval = atoi(yytext);
                                                                                                                         return DEC;
                                                                                                                     }
-"+" | "-" | "*" | "/" | "<" | "<=" | ">" | ">=" | "==" | "!=" | "&&" | "||"                             	    {return BINOP;}
-"-" | "!"                                                                                                	    {return UNOP;}
+"||"                                                                                                                {return OR;}                                   
+"&&"                                                                                                                {return AND;}
+"=="                                                                                                                {return EQUAL;}
+"!="                                                                                                                {return DIFF;}                                               
+"<"                                                                                                                 {return LESS;}
+"<="                                                                                                                {return LESSEQUAL;}    
+">="                                                                                                                {return GREATEQUAL;} 
+">"                                                                                                                 {return GREAT;} 
+"+"                                                                                                                 {return PLUS;} 
+"-"                                                                                                                 {return MINUS;} 
+"*"                                                                                                                 {return MULT;}                                                                                                             
+"/"                                                                                                                 {return DIV;} 
+"!"                                                                                                                 {return NOT;}    
 def                                                                                                                 {return DEF;}
 return                                                                                                              {return RETURN;}
 let                                                                                                                 {return LET;}
@@ -52,7 +65,7 @@ break                                                                           
 {ID}                                                                                                                {
                                                                                                                     yylval.string = malloc(strlen(yytext));
                                                                                                                     strncpy(yylval.string, yytext, strlen(yytext));
-                                                                                                                    return(ID);
+                                                                                                                    return(IDENTIFIER);
                                                                                                                     }
 \n                                                                                                                  {++lineNumber;}
 {ws}+                                                                                                               /*Remove espaços em branco*/

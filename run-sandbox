@@ -1,6 +1,6 @@
 #!/bin/bash
 
 echo "Teste 1"
-./Sintatico sandbox/input1.def sandbox/out1.syn
-diff sandbox/out1.syn sandbox/expected1.syn
+./Sintatico sandbox/input1.txt sandbox/out1.txt
+diff sandbox/out1.txt sandbox/expected1.txt
 

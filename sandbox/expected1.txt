@@ -1,0 +1,11 @@
+[program 
+  [decfunc 
+    [add] 
+    [paramlist [x] [y]] 
+    [block 
+      [return 
+        [+ [x] [y]]
+      ]
+    ]
+  ]  
+] 

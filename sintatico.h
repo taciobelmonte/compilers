@@ -39,62 +39,85 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     BINOP = 258,
-     UNOP = 259,
-     SYM = 260,
-     DEC = 261,
-     DEF = 262,
-     RETURN = 263,
-     LET = 264,
-     IF = 265,
-     ELSE = 266,
-     WHILE = 267,
-     ASSIGN = 268,
-     CONTINUE = 269,
-     BREAK = 270,
-     OPENPAR = 271,
-     CLOSEPAR = 272,
-     OPENBLOCK = 273,
-     ENDEXPRESSION = 274,
-     SEPARADOR = 275,
-     CLOSEBLOCK = 276,
-     ID = 277
+     DEC = 258,
+     DEF = 259,
+     RETURN = 260,
+     LET = 261,
+     IF = 262,
+     ELSE = 263,
+     WHILE = 264,
+     ASSIGN = 265,
+     CONTINUE = 266,
+     BREAK = 267,
+     OPENPAR = 268,
+     CLOSEPAR = 269,
+     OPENBLOCK = 270,
+     CLOSEBLOCK = 271,
+     ENDEXPRESSION = 272,
+     SEPARADOR = 273,
+     IDENTIFIER = 274,
+     OR = 275,
+     AND = 276,
+     EQUAL = 277,
+     DIFF = 278,
+     LESS = 279,
+     LESSEQUAL = 280,
+     GREATEQUAL = 281,
+     GREAT = 282,
+     PLUS = 283,
+     MINUS = 284,
+     MULT = 285,
+     DIV = 286,
+     NOT = 287,
+     UMINUS = 288
    };
 #endif
 /* Tokens.  */
-#define BINOP 258
-#define UNOP 259
-#define SYM 260
-#define DEC 261
-#define DEF 262
-#define RETURN 263
-#define LET 264
-#define IF 265
-#define ELSE 266
-#define WHILE 267
-#define ASSIGN 268
-#define CONTINUE 269
-#define BREAK 270
-#define OPENPAR 271
-#define CLOSEPAR 272
-#define OPENBLOCK 273
-#define ENDEXPRESSION 274
-#define SEPARADOR 275
-#define CLOSEBLOCK 276
-#define ID 277
+#define DEC 258
+#define DEF 259
+#define RETURN 260
+#define LET 261
+#define IF 262
+#define ELSE 263
+#define WHILE 264
+#define ASSIGN 265
+#define CONTINUE 266
+#define BREAK 267
+#define OPENPAR 268
+#define CLOSEPAR 269
+#define OPENBLOCK 270
+#define CLOSEBLOCK 271
+#define ENDEXPRESSION 272
+#define SEPARADOR 273
+#define IDENTIFIER 274
+#define OR 275
+#define AND 276
+#define EQUAL 277
+#define DIFF 278
+#define LESS 279
+#define LESSEQUAL 280
+#define GREATEQUAL 281
+#define GREAT 282
+#define PLUS 283
+#define MINUS 284
+#define MULT 285
+#define DIV 286
+#define NOT 287
+#define UMINUS 288
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 66 "sintatico.y"
+#line 78 "sintatico.y"
 {
     char *string;
     int intval;
+    ASTNode *ASTp;  
 }
 /* Line 1529 of yacc.c.  */
-#line 98 "sintatico.tab.h"
+#line 121 "sintatico.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
