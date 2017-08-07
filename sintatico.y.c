@@ -893,12 +893,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   484,   484,   489,   493,   497,   499,   504,   508,   513,
-     516,   522,   526,   531,   535,   537,   542,   546,   548,   552,
-     554,   558,   563,   567,   572,   576,   580,   584,   589,   592,
-     594,   600,   604,   610,   611,   616,   621,   625,   627,   631,
-     635,   639,   643,   647,   651,   655,   659,   663,   667,   671,
-     675,   679,   683,   687,   691,   695
+       0,   484,   484,   490,   495,   500,   502,   508,   513,   518,
+     521,   528,   533,   538,   543,   545,   551,   556,   558,   563,
+     565,   570,   576,   581,   587,   592,   597,   602,   608,   612,
+     614,   621,   626,   633,   634,   640,   646,   651,   653,   658,
+     663,   668,   673,   678,   683,   688,   693,   698,   702,   706,
+     710,   714,   718,   722,   727,   732
 };
 #endif
 
@@ -1890,48 +1890,53 @@ yyreduce:
     {
                                                                             printf("-[program])\n ");
                                                                             createNAryASTree((yyvsp[(1) - (1)].ASTp));
+                                                                            COUNTER++;
                                                                         ;}
     break;
 
   case 3:
-#line 489 "sintatico.y"
+#line 490 "sintatico.y"
     {
                                                                             //printf("2 (Decvar)\n ");
                                                                             (yyval.ASTp) = allocTreeNode(LSTMT,2,(yyvsp[(1) - (2)].ASTp),(yyvsp[(2) - (2)].ASTp));
+                                                                            COUNTER++;
                                                                         ;}
     break;
 
   case 4:
-#line 493 "sintatico.y"
+#line 495 "sintatico.y"
     {
                                                                            printf("3- [decfunc]\n ");
-                                                                            (yyval.ASTp) = allocTreeNode(LSTMT, 2, (yyvsp[(1) - (2)].ASTp), (yyvsp[(2) - (2)].ASTp));
+                                                                           (yyval.ASTp) = allocTreeNode(LSTMT, 2, (yyvsp[(1) - (2)].ASTp), (yyvsp[(2) - (2)].ASTp));
+                                                                           COUNTER++;
                                                                         ;}
     break;
 
   case 5:
-#line 497 "sintatico.y"
+#line 500 "sintatico.y"
     {(yyval.ASTp) = NULL;;}
     break;
 
   case 6:
-#line 499 "sintatico.y"
+#line 502 "sintatico.y"
     {
                                                                          // printf("4 (let ) \n");
                                                                           (yyval.ASTp) = allocTreeNode(LTIPAGEM, 2, allocID((yyvsp[(2) - (4)].string)), (yyvsp[(3) - (4)].ASTp));
+                                                                          COUNTER++;
                                                                         ;}
     break;
 
   case 7:
-#line 504 "sintatico.y"
+#line 508 "sintatico.y"
     {
                                                                            // printf("4 (let x = ) \n");
                                                                             (yyval.ASTp) = allocTreeNode(LENDEXPRESSION, 1, (yyvsp[(2) - (2)].ASTp));
+                                                                            COUNTER++;
                                                                         ;}
     break;
 
   case 8:
-#line 508 "sintatico.y"
+#line 513 "sintatico.y"
     {
                                                                          //printf("4 (let x;)\n");
                                                                         (yyval.ASTp) = NULL;
@@ -1939,30 +1944,32 @@ yyreduce:
     break;
 
   case 9:
-#line 513 "sintatico.y"
+#line 518 "sintatico.y"
     {
                                                                           yyerror("print");
                                                                         ;}
     break;
 
   case 10:
-#line 516 "sintatico.y"
+#line 521 "sintatico.y"
     {
                                                                        // printf("6-(decfunc (%s)) \n", $2);
                                                                         (yyval.ASTp) = allocTreeNode(LDEF,3, allocID((yyvsp[(2) - (6)].string)), (yyvsp[(4) - (6)].ASTp), (yyvsp[(6) - (6)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 11:
-#line 522 "sintatico.y"
+#line 528 "sintatico.y"
     {
                                                                        // printf("8-(paramlist loop)\n");
                                                                         (yyval.ASTp) = allocTreeNode(LPARAM, 2, allocID((yyvsp[(1) - (2)].string)),(yyvsp[(2) - (2)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 12:
-#line 526 "sintatico.y"
+#line 533 "sintatico.y"
     {
                                                                        // printf("8-(no paramlist)\n");
                                                                         (yyval.ASTp) = NULL;
@@ -1970,333 +1977,364 @@ yyreduce:
     break;
 
   case 13:
-#line 531 "sintatico.y"
+#line 538 "sintatico.y"
     {
                                                                         //printf("9-(,ID looparams) \n");
                                                                         (yyval.ASTp) = allocTreeNode(LCOMPPARAM, 2, allocID((yyvsp[(2) - (3)].string)),(yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 14:
-#line 535 "sintatico.y"
+#line 543 "sintatico.y"
     {(yyval.ASTp) = NULL ;;}
     break;
 
   case 15:
-#line 537 "sintatico.y"
+#line 545 "sintatico.y"
     {
                                                                         printf("10- [bloco] \n");
                                                                         (yyval.ASTp) = allocTreeNode(LBLOCK, 3, (yyvsp[(2) - (4)].ASTp), (yyvsp[(3) - (4)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 16:
-#line 542 "sintatico.y"
+#line 551 "sintatico.y"
     {
                                                                         //printf("11- (loopdecvar) \n");
                                                                         (yyval.ASTp) = allocTreeNode(LDECVAR, 2, (yyvsp[(1) - (2)].ASTp), (yyvsp[(2) - (2)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 17:
-#line 546 "sintatico.y"
+#line 556 "sintatico.y"
     {(yyval.ASTp) = NULL ;;}
     break;
 
   case 18:
-#line 548 "sintatico.y"
+#line 558 "sintatico.y"
     {
                                                                         //printf("12- (loop stmts)\n ");
                                                                         (yyval.ASTp) = allocTreeNode(LBACK, 2, (yyvsp[(1) - (2)].ASTp), (yyvsp[(2) - (2)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 19:
-#line 552 "sintatico.y"
+#line 563 "sintatico.y"
     {(yyval.ASTp) = NULL ;;}
     break;
 
   case 20:
-#line 554 "sintatico.y"
+#line 565 "sintatico.y"
     {
                                                                         printf("220- (funccall ;) \n");
                                                                         (yyval.ASTp) = allocTreeNode(LSTATEMENTFUNCCALL, 1, (yyvsp[(1) - (2)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 21:
-#line 558 "sintatico.y"
+#line 570 "sintatico.y"
     {
                                                                         (yyval.ASTp) = allocTreeNode(LASSIGNSTMT, 1, (yyvsp[(1) - (2)].ASTp));
                                                                         printf("220- (assign ;) \n");
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 22:
-#line 563 "sintatico.y"
+#line 576 "sintatico.y"
     {
                                                                         //printf("15- if(exp){} \n");
                                                                         (yyval.ASTp) = allocTreeNode(LSTMTIF, 3, (yyvsp[(3) - (5)].ASTp), (yyvsp[(5) - (5)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 23:
-#line 567 "sintatico.y"
+#line 581 "sintatico.y"
     {
                                                                         //printf("15- if(exp)else{} \n");
                                                                         (yyval.ASTp) = allocTreeNode(LSTMTIF, 3, (yyvsp[(3) - (6)].ASTp), (yyvsp[(5) - (6)].string), (yyvsp[(6) - (6)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 24:
-#line 572 "sintatico.y"
+#line 587 "sintatico.y"
     {
                                                                         //printf("16- while(exp){} \n");
                                                                         (yyval.ASTp) = allocTreeNode(LWHILE, 2, (yyvsp[(3) - (5)].ASTp), (yyvsp[(5) - (5)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 25:
-#line 576 "sintatico.y"
+#line 592 "sintatico.y"
     {
                                                                         //printf("17- return loopexp; \n");
                                                                         (yyval.ASTp) = allocTreeNode(LLABELRETURN, 1, (yyvsp[(2) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 26:
-#line 580 "sintatico.y"
+#line 597 "sintatico.y"
     {
                                                                         //printf("20 -break; \n");
                                                                         (yyval.ASTp) = allocTreeNode(LLABELBREAK, 2, (yyvsp[(1) - (2)].string), (yyvsp[(2) - (2)].string));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 27:
-#line 584 "sintatico.y"
+#line 602 "sintatico.y"
     {
                                                                         //printf("20 -continue; \n");
                                                                         (yyval.ASTp) = allocTreeNode(LLABELCONTINUE,2,(yyvsp[(1) - (2)].string), (yyvsp[(2) - (2)].string));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 28:
-#line 589 "sintatico.y"
+#line 608 "sintatico.y"
     {
                                                                         (yyval.ASTp) = allocTreeNode(LEXP, 1, (yyvsp[(1) - (1)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 29:
-#line 592 "sintatico.y"
+#line 612 "sintatico.y"
     {(yyval.ASTp)=NULL;;}
     break;
 
   case 30:
-#line 594 "sintatico.y"
+#line 614 "sintatico.y"
     {
                                                                         printf("23 x=exp \n");
                                                                         //$$ = allocTreeNode(LASSIGNSTMT, 1, $1);
                                                                         (yyval.ASTp) = allocTreeNode(LCOMPASSIGN, 2, allocID((yyvsp[(1) - (3)].string)), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 31:
-#line 600 "sintatico.y"
+#line 621 "sintatico.y"
     {
                                                                         printf("24- id() \n");
                                                                         (yyval.ASTp) = allocTreeNode(LFUNCCALL, 2, allocID((yyvsp[(1) - (4)].string)), (yyvsp[(3) - (4)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 32:
-#line 604 "sintatico.y"
+#line 626 "sintatico.y"
     {
                                                                         printf("24- id() \n");
                                                                         (yyval.ASTp) = allocTreeNode(LFUNCCALL, 2, allocID((yyvsp[(1) - (4)].string)), (yyvsp[(3) - (4)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 33:
-#line 610 "sintatico.y"
+#line 633 "sintatico.y"
     {(yyval.ASTp)=NULL;;}
     break;
 
   case 34:
-#line 611 "sintatico.y"
+#line 634 "sintatico.y"
     {
                                                                         (yyval.ASTp) = allocTreeNode(LFUNCNARGLIST, 1, (yyvsp[(1) - (1)].ASTp));
+                                                                        COUNTER++;
                                                                        ;}
     break;
 
   case 35:
-#line 616 "sintatico.y"
+#line 640 "sintatico.y"
     {
                                                                         printf("26 - [] \n");
                                                                         (yyval.ASTp) = allocTreeNode(LFUNCNNARGLIST, 2, (yyvsp[(1) - (2)].ASTp), (yyvsp[(2) - (2)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 36:
-#line 621 "sintatico.y"
+#line 646 "sintatico.y"
     {
                                                                         // printf("27 - (, [%d]) \n", $2);
                                                                          (yyval.ASTp) = allocTreeNode(LFUNCNNARGLIST, 2, (yyvsp[(2) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                         COUNTER++;
                                                                         ;}
     break;
 
   case 37:
-#line 625 "sintatico.y"
+#line 651 "sintatico.y"
     {(yyval.ASTp)=NULL;;}
     break;
 
   case 38:
-#line 627 "sintatico.y"
+#line 653 "sintatico.y"
     {
                                                                         printf("28 - exp + exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LPLUS, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 39:
-#line 631 "sintatico.y"
+#line 658 "sintatico.y"
     {
                                                                         printf("29 - exp - exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LMINUS, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 40:
-#line 635 "sintatico.y"
+#line 663 "sintatico.y"
     {
                                                                         printf("30 - exp * exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LMULT, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 41:
-#line 639 "sintatico.y"
+#line 668 "sintatico.y"
     {
                                                                         printf("31 - exp / exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LDIV, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 42:
-#line 643 "sintatico.y"
+#line 673 "sintatico.y"
     {
                                                                         printf("32 - exp < exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LLESS, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 43:
-#line 647 "sintatico.y"
+#line 678 "sintatico.y"
     {
                                                                         printf("33 - exp <= exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LLESSEQUAL, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 44:
-#line 651 "sintatico.y"
+#line 683 "sintatico.y"
     {
                                                                         printf("34 - exp > exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LGREAT, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 45:
-#line 655 "sintatico.y"
+#line 688 "sintatico.y"
     {
                                                                         printf("35 - exp >= exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LGREATEQUAL, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 46:
-#line 659 "sintatico.y"
+#line 693 "sintatico.y"
     {
                                                                         printf("36 - exp = exp \n");
                                                                         (yyval.ASTp) = allocTreeNode(LEQUAL, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 47:
-#line 663 "sintatico.y"
+#line 698 "sintatico.y"
     {
                                                                         printf("37 - exp != exp \n");
-                                                                        (yyval.ASTp) = allocTreeNode(LDIFF, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        (yyval.ASTp) = allocTreeNode(LDIFF, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));COUNTER++;
                                                                         ;}
     break;
 
   case 48:
-#line 667 "sintatico.y"
+#line 702 "sintatico.y"
     {
                                                                         printf("38 - exp && exp \n");
-                                                                        (yyval.ASTp) = allocTreeNode(LAND, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        (yyval.ASTp) = allocTreeNode(LAND, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));COUNTER++;
                                                                         ;}
     break;
 
   case 49:
-#line 671 "sintatico.y"
+#line 706 "sintatico.y"
     {
                                                                         printf("39 - exp || exp \n");
-                                                                        (yyval.ASTp) = allocTreeNode(LOR, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        (yyval.ASTp) = allocTreeNode(LOR, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));COUNTER++;
                                                                         ;}
     break;
 
   case 50:
-#line 675 "sintatico.y"
+#line 710 "sintatico.y"
     {
                                                                         printf("40 - exp \n");
-                                                                        (yyval.ASTp) = allocTreeNode(LUMINUS, 1, (yyvsp[(2) - (2)].ASTp));
+                                                                        (yyval.ASTp) = allocTreeNode(LUMINUS, 1, (yyvsp[(2) - (2)].ASTp));COUNTER++;
                                                                         ;}
     break;
 
   case 51:
-#line 679 "sintatico.y"
+#line 714 "sintatico.y"
     {
                                                                         printf("41 - !exp \n");
-                                                                        (yyval.ASTp) = allocTreeNode(LNOT, 1, (yyvsp[(2) - (2)].ASTp));
+                                                                        (yyval.ASTp) = allocTreeNode(LNOT, 1, (yyvsp[(2) - (2)].ASTp));COUNTER++;
                                                                         ;}
     break;
 
   case 52:
-#line 683 "sintatico.y"
+#line 718 "sintatico.y"
     {
                                                                         printf("42 - (exp) \n");
-                                                                        (yyval.ASTp) = allocTreeNode(LOPENPAR, 1, (yyvsp[(2) - (3)].ASTp));
+                                                                        (yyval.ASTp) = allocTreeNode(LOPENPAR, 1, (yyvsp[(2) - (3)].ASTp));COUNTER++;
                                                                         ;}
     break;
 
   case 53:
-#line 687 "sintatico.y"
+#line 722 "sintatico.y"
     {
                                                                         printf("43 - funccall\n");
-                                                                        { (yyval.ASTp) = allocTreeNode(LLABELFUNCCALL, 2, (yyvsp[(1) - (1)].ASTp)); }
+                                                                        (yyval.ASTp) = allocTreeNode(LLABELFUNCCALL, 2, (yyvsp[(1) - (1)].ASTp));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 54:
-#line 691 "sintatico.y"
+#line 727 "sintatico.y"
     {
                                                                         printf("44 dec\n ");
                                                                         (yyval.ASTp) = allocINT((yyvsp[(1) - (1)].intval));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
   case 55:
-#line 695 "sintatico.y"
+#line 732 "sintatico.y"
     {
                                                                         printf("45 id\n ");
                                                                         (yyval.ASTp) = allocID((yyvsp[(1) - (1)].string));
+                                                                        COUNTER++;
                                                                         ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2300 "sintatico.tab.c"
+#line 2338 "sintatico.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2510,7 +2548,7 @@ yyreturn:
 }
 
 
-#line 700 "sintatico.y"
+#line 738 "sintatico.y"
 
 
 int yyerror(const char *s) {
@@ -2536,7 +2574,7 @@ int main(int argc, char** argv) {
     fclose(output);
 
     //If errors, clear file
-    if(ERRORS != 0){
+    if(ERRORS != 0 || COUNTER==1){
         FILE *output = fopen(argv[2], "w");
         fclose(output);
     }
