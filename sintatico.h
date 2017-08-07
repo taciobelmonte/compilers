@@ -110,11 +110,11 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 78 "sintatico.y"
+#line 400 "sintatico.y"
 {
+    ASTNode *ASTp;  
     char *string;
     int intval;
-    ASTNode *ASTp;  
 }
 /* Line 1529 of yacc.c.  */
 #line 121 "sintatico.tab.h"

@@ -14,7 +14,6 @@
 #include "library.h"
 #include "sintatico.h"
 
-
 int lineNumber = 1;
 
 %}

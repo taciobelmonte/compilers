@@ -142,17 +142,19 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-    
+#include <stdbool.h>
+
+#define BUFFERMAX 2000
+#define MAXCHAR 500
     
 //Instancia variáveis
 int yylex();
 int yyparse();
+int yyerror(const char *);
 FILE *yyin;
 FILE *yyout;
 int COUNTER = 0;
-
-#define BUFFERMAX 2000
-#define MAXCHAR 500
+int ERRORS  = 0;
 
 typedef enum typesList {
     INT,
@@ -160,14 +162,62 @@ typedef enum typesList {
     AST
 }type;
 
+/*################ AST DEFINITIONS #####################*/
+#define BUFFERMAX 2000
+#define MAXCHAR 500
+
+//Keys to pass info to createNode in the AST
+typedef enum keyList{
+    LPLUS,    
+    LMINUS,
+    LMULT,
+    LDIV,
+    LUMINUS,
+    LAND,
+    LOR,
+    LNOT    ,   
+    LGREAT,
+    LGREATEQUAL      ,
+    LLESSEQUAL  ,
+    LLESS,
+    LEQUAL,
+    LDIFF      ,
+    LWHILE,
+    LLABELRETURN,
+    LLABELFUNCCALL,
+    LSTMT,
+    LIF,
+    LSTMTIF,
+    LASSIGN,
+    LENDEXPRESSION,
+    LDECVAR,
+    LEXP,
+    LSTMTSTMT,
+    LSTMTFUNCCALL,
+    LFUNCNARGLIST,
+    LOPENPAR,
+    LFUNCNNARGLIST,
+    LFUNCCALL,
+    LLABELCONTINUE,
+    LSTMTELSE,
+    LVOLTASTMT,
+    LCOMPASSIGN,
+    LLABELBREAK,
+    LASSIGNSTMT,
+    LBLOCK,
+    LCOMPPARAM,
+    LPARAM,
+    LDEF,
+    LTIPAGEM
+}keys;
+
+/*################## AST STRUCTURE #################*/
 typedef struct {
     int integer;
 }nodeINT;
-
 typedef struct{
     char name[MAXCHAR];
 }nodeID;
-
 typedef struct {
     int token;
     int totalkids;                                      
@@ -175,43 +225,314 @@ typedef struct {
 }ASTree;
 
 typedef struct ASTNo{
+    type tipo;
     union {
         nodeINT integer;   
         nodeID id;
         ASTree tree;        
     };
-    type tipo;
 }ASTNode;
+/*################## AST STRUCTURE #################*/
 
 
+/*################## HELPER FUNCTIONS #################*/
+//Estrutura para gerar um buffer de Strings
+typedef struct stringBuffer{
+    char palavra[BUFFERMAX];
+    struct stringBuffer* prox;
+}stringBuffer;
 
-//Function to print node info
-//void printNodeInfo(ASTree *tree) {
-    //printf("   Entrou no print_node_info\n");
+//Função Insere Início da Lista Encadeada
+stringBuffer* insereLista(stringBuffer* l, char palavra[]){
+    stringBuffer* novo = (stringBuffer*)malloc(sizeof(stringBuffer));
+    int i;
+
+    for (i=0; i<strlen(palavra); i++) 
+        novo->palavra[i] = palavra[i];
+
+    novo->palavra[strlen(palavra)] = '\0';
+    novo->prox = l;
+    COUNTER++;
+    return novo;
+}
+
+//Função Imprime buffer de String
+void imprimeLista(stringBuffer* l){
+    int i = 1;
+    do{
+        if( l->prox != NULL){
+            if(COUNTER-1 == i){
+                fprintf(yyout, "[%s]", l->palavra);
+            }else{
+                fprintf(yyout, "[%s] ", l->palavra);
+            }
+        }else{
+            if(strcmp("", l->palavra) != 0){
+                fprintf(yyout, " [%s]", l->palavra);
+            }
+        }
+        l= l->prox;
+        i++;
+    }while(l != NULL);
+}
+stringBuffer* lista     = NULL;
+
+//Declare functions
+ASTNode *allocINT(int valor);
+ASTNode *allocID(char string[MAXCHAR]);
+ASTNode *allocTreeNode(int no_token, int nfilhos, ...);
+void createNAryASTree(ASTNode *tree);
+void createASTreeType(ASTNode *tree);
+
+//Functions Denifitions
+ASTNode *allocINT(int valor) {
+    ASTNode *newnode = malloc(sizeof(ASTNode));
+    newnode->tipo = INT;
+    newnode->integer.integer = valor;
+    return newnode;
+}
+ASTNode *allocID(char string[MAXCHAR]) {
+    ASTNode *newnode = malloc(sizeof(ASTNode));
+    newnode->tipo = ID;
+    strcpy(newnode->id.name, string);
+    return newnode;
+}
+ASTNode *allocTreeNode(int token, int totalkids, ...) {
+    int i = 0;
+    va_list list;
+
+    //    printf("criou node %d\n ", token);
+    ASTNode *newnode = malloc(sizeof(ASTNode));
+
+    newnode->tree.kids = malloc(totalkids*sizeof(ASTNode*));
+    va_start( list, totalkids);
     
-    //printf("  %s\n", tree->name);
+    newnode->tipo               = AST;
+    newnode->tree.token         = token;
+    newnode->tree.totalkids     = totalkids;
+
+    for(i =0; i < totalkids; i++)
+         newnode->tree.kids[i] = va_arg(list, ASTNode*);
     
-    //if (tree->kids && tree->siblings) {
-      //  printf("%d, parent of %d and sibling of %d\n", tree->val, (tree->kids)->val, (tree->siblings)->val);
-    //} else if (tree->kids) {
-     //   printf("%d, parent of %d\n", tree->val, (tree->kids)->val);
-    //} else if (tree->siblings) {
-     //   printf("%d, sibling of %d\n", tree->val, (tree->siblings)->val);
-   // } else printf("%d\n", tree->val);
-//};
+    va_end(list);
+    return newnode;
+}
 
-//Function to print Tree in Pre-order
-//void printASTinOrder(ASTree *tree) {
-   // printNodeInfo(tree);
+void createNAryASTree(ASTNode *tree)
+{
+    if(tree != NULL) {
+        if(tree->tipo == AST)
+            createASTreeType(tree);
+        if(tree->tipo == ID)
+            fprintf(yyout," [%s]", tree->id.name);
+        if(tree->tipo == INT)
+            fprintf(yyout," [%d]", tree->integer.integer);	
+    }
+}
+
+
+
+/**
+ * @param ASTNode tree
+ * @param item
+ * @param type - 0 for BINOP ? 1 for UNOP ? 2 for 3 children
+ */
+void caseExpression(ASTNode *tree, char* item, int type, int label){
     
-   // printf("entrou no pre-order-print\n");
-    //if (tree->kids) pre_order_print(tree->kids);
-    //if (tree->siblings) pre_order_print(tree->siblings);
-//};
+    if(label){
+        fprintf(yyout, " [");
+        fprintf(yyout, "%s", item);
+    }
+    //Create tree for first node
+    createNAryASTree(tree->tree.kids[0]);
+    
+    //Create tree for second node if is binop operation
+    if(!type)
+        createNAryASTree(tree->tree.kids[1]);
+    
+    if(label)
+        fprintf(yyout, "]");
+}
 
-/*################ AST DEFINITIONS #####################*/
-//ASTree *tree;
 
+void createASTreeType(ASTNode *tree){
+    switch(tree->tree.token) {
+        case LPLUS:
+            caseExpression(tree, "+",0, 1);
+        break;
+        case LMINUS:
+            caseExpression(tree, "-",0, 1);
+        break;
+        case LMULT:
+            caseExpression(tree, "*",0, 1);
+            break;
+        case LDIV:
+            caseExpression(tree, "/",0, 1);
+            break;
+        case LUMINUS:
+            caseExpression(tree, "-",0, 1);
+            break;
+        case LAND:
+            caseExpression(tree, "&&",0, 1);
+            break;
+        case LOR:
+            caseExpression(tree, "||",0, 1);
+            break;
+        case LNOT:
+            caseExpression(tree, "!",1, 1);
+            break;
+        case LGREAT:
+            caseExpression(tree, ">",0, 1);
+            break;
+        case LGREATEQUAL:
+            caseExpression(tree, ">=",0, 1);
+            break;
+        case LLESSEQUAL:
+            caseExpression(tree, "<=",0, 1);
+            break;
+        case LLESS:
+            caseExpression(tree, "<",0, 1);
+            break;
+        case LEQUAL:
+            caseExpression(tree, "==",0, 1);
+            break;
+        case LDIFF:
+            caseExpression(tree, "!=",0, 1);
+            break;  
+        case LWHILE:
+            caseExpression(tree, "while",0, 1);
+            break;
+        case LLABELRETURN:
+            caseExpression(tree, "return",1, 1);
+            break;
+        case LLABELFUNCCALL:
+            caseExpression(tree, "funccall",0, 1);
+            break;
+         case LSTMTIF:
+            caseExpression(tree, "if", 2, 1);
+            break;
+        case LIF:
+            caseExpression(tree, "", 1, 0);
+            if(tree->tree.totalkids>2)
+                createNAryASTree(tree->tree.kids[2]);
+            break;
+        case LSTMT:
+            if(tree->tree.totalkids>=2){ 
+                if(tree->tree.kids[0]!= NULL) {
+                    caseExpression(tree, "", 1, 0);
+                }else {
+                    createNAryASTree(tree->tree.kids[0]);
+                }
+            }
+            break;
+        case LASSIGN:
+            createNAryASTree(tree->tree.kids[0]);
+            fprintf(yyout, " [assign ");     
+            fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
+            fprintf(yyout, "]");     
+            break;
+        case LENDEXPRESSION:
+             createNAryASTree(tree->tree.kids[0]); 
+             fprintf(yyout, "]");  
+            break;
+        case LDECVAR:
+                createNAryASTree(tree->tree.kids[0]); 
+                if(tree->tree.kids[1] != NULL) 
+                    createNAryASTree(tree->tree.kids[1]); 
+                break;
+        case LEXP:
+            createNAryASTree(tree->tree.kids[0]); 
+            break;
+        case LSTMTSTMT:
+            createNAryASTree(tree->tree.kids[0]); 
+            break;
+        case LTIPAGEM:
+            if( tree->tree.totalkids>=2){ 
+                if(tree->tree.kids[1]!= NULL) {
+                    fprintf(yyout, " [decvar ");
+                    fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
+                    createNAryASTree(tree->tree.kids[1]);
+                } else {
+                    fprintf(yyout, " [decvar [%s]] ", tree->tree.kids[0]->id.name);
+                }
+            }
+            break;
+        case LDEF:
+                fprintf(yyout, " [decfunc [%s] ",tree->tree.kids[0]->id.name);
+                createNAryASTree(tree->tree.kids[1]);
+                if(tree->tree.kids[1] == NULL)
+                    fprintf(yyout, "[paramlist]");
+                createNAryASTree(tree->tree.kids[2]);
+                fprintf(yyout, "]");
+                break;
+        case LPARAM:
+                fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
+                createNAryASTree(tree->tree.kids[1]);			           
+                fprintf(yyout, "]");
+                break;
+        case LCOMPPARAM:
+                fprintf(yyout, " [%s]",tree->tree.kids[0]->id.name);
+                createNAryASTree(tree->tree.kids[1]);			           
+                break;
+        case LBLOCK:
+                fprintf(yyout, " [block");
+                if(tree->tree.kids[0] != NULL) 
+                    createNAryASTree(tree->tree.kids[0]);
+                if(tree->tree.kids[1] != NULL) 
+                        createNAryASTree(tree->tree.kids[1]);
+                fprintf(yyout, "]");
+                break;
+         case LASSIGNSTMT:
+                fprintf(yyout, " [assign ");
+                createNAryASTree(tree->tree.kids[0]);
+                break;
+         case LCOMPASSIGN:
+                fprintf(yyout, "[%s] ", tree->tree.kids[0]->id.name);   
+                createNAryASTree(tree->tree.kids[1]); 
+                fprintf(yyout, "]");
+                break;
+         case LVOLTASTMT:
+                createNAryASTree(tree->tree.kids[0]); 
+                 if(tree->tree.kids[1] != NULL)
+                    createNAryASTree(tree->tree.kids[1]); 
+                break;
+         case LLABELBREAK:
+                fprintf(yyout, " [break]");
+                break;
+         case LSTMTELSE:
+                createNAryASTree(tree->tree.kids[0]);
+                break;
+         case LLABELCONTINUE:
+                fprintf(yyout," [continue]");
+                break;
+         case LSTMTFUNCCALL:
+                fprintf(yyout," [funccall ");
+                createNAryASTree(tree->tree.kids[0]); 
+                fprintf(yyout,"]");
+                break;
+         case LFUNCNARGLIST:
+                caseExpression(tree, "arglist",1, 1);
+                break;
+          case LOPENPAR:
+            createNAryASTree(tree->tree.kids[0]);
+            break;
+         case LFUNCNNARGLIST:
+            caseExpression(tree, "",1, 0);
+            break;
+         case LFUNCCALL:
+            if(tree->tree.kids[1] != NULL) {
+                fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name); 
+                createNAryASTree(tree->tree.kids[1]); 
+            }
+            else {
+                fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name); 
+                fprintf(yyout,"[arglist]");
+            }
+         break;
+    }
+}
+
+/*######## HELPER FUNCTIONS ##########*/
 
 
 /* Enabling traces.  */
@@ -234,14 +555,14 @@ typedef struct ASTNo{
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 78 "sintatico.y"
+#line 400 "sintatico.y"
 {
+    ASTNode *ASTp;  
     char *string;
     int intval;
-    ASTNode *ASTp;  
 }
 /* Line 193 of yacc.c.  */
-#line 245 "sintatico.tab.c"
+#line 566 "sintatico.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -254,7 +575,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 258 "sintatico.tab.c"
+#line 579 "sintatico.tab.c"
 
 #ifdef short
 # undef short
@@ -469,16 +790,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  9
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   234
+#define YYLAST   176
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  34
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  17
+#define YYNNTS  19
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  51
+#define YYNRULES  53
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  105
+#define YYNSTATES  103
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -526,47 +847,46 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     5,     8,    11,    12,    16,    22,    29,
-      35,    38,    42,    43,    48,    51,    52,    55,    56,    59,
-      65,    73,    79,    83,    86,    89,    92,    94,    96,   100,
-     105,   109,   112,   116,   117,   121,   125,   129,   133,   137,
-     141,   145,   149,   153,   157,   161,   165,   168,   171,   175,
-     177,   179
+       0,     0,     3,     5,     8,    11,    12,    17,    20,    21,
+      28,    31,    32,    36,    37,    42,    45,    46,    49,    50,
+      53,    59,    66,    72,    76,    79,    82,    84,    86,    88,
+      89,    93,    98,   102,   105,   109,   110,   114,   118,   122,
+     126,   130,   134,   138,   142,   146,   150,   154,   158,   161,
+     164,   168,   170,   172
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      35,     0,    -1,    36,    -1,    37,    36,    -1,    38,    36,
-      -1,    -1,     6,    19,    17,    -1,     6,    19,    10,    50,
-      17,    -1,     4,    19,    13,    39,    14,    41,    -1,     4,
-      19,    13,    14,    41,    -1,    19,    40,    -1,    18,    19,
-      40,    -1,    -1,    15,    42,    43,    16,    -1,    37,    42,
-      -1,    -1,    44,    43,    -1,    -1,    45,    17,    -1,     7,
-      13,    50,    14,    41,    -1,     7,    13,    50,    14,    41,
-       8,    41,    -1,     9,    13,    50,    14,    41,    -1,     5,
-      50,    17,    -1,     5,    17,    -1,    12,    17,    -1,    11,
-      17,    -1,    46,    -1,    47,    -1,    19,    10,    50,    -1,
-      19,    13,    48,    14,    -1,    19,    13,    14,    -1,    50,
-      49,    -1,    18,    50,    49,    -1,    -1,    50,    28,    50,
-      -1,    50,    29,    50,    -1,    50,    30,    50,    -1,    50,
-      31,    50,    -1,    50,    24,    50,    -1,    50,    25,    50,
-      -1,    50,    27,    50,    -1,    50,    26,    50,    -1,    50,
-      22,    50,    -1,    50,    23,    50,    -1,    50,    21,    50,
-      -1,    50,    20,    50,    -1,    29,    50,    -1,    32,    50,
-      -1,    13,    50,    14,    -1,    47,    -1,     3,    -1,    19,
-      -1
+      35,     0,    -1,    36,    -1,    37,    36,    -1,    39,    36,
+      -1,    -1,     6,    19,    38,    17,    -1,    10,    52,    -1,
+      -1,     4,    19,    13,    40,    14,    42,    -1,    19,    41,
+      -1,    -1,    18,    19,    41,    -1,    -1,    15,    43,    44,
+      16,    -1,    37,    43,    -1,    -1,    45,    44,    -1,    -1,
+      46,    17,    -1,     7,    13,    52,    14,    42,    -1,     7,
+      13,    52,    14,     8,    42,    -1,     9,    13,    52,    14,
+      42,    -1,     5,    47,    17,    -1,    12,    17,    -1,    11,
+      17,    -1,    48,    -1,    49,    -1,    52,    -1,    -1,    19,
+      10,    52,    -1,    19,    13,    50,    14,    -1,    19,    13,
+      14,    -1,    52,    51,    -1,    18,    52,    51,    -1,    -1,
+      52,    28,    52,    -1,    52,    29,    52,    -1,    52,    30,
+      52,    -1,    52,    31,    52,    -1,    52,    24,    52,    -1,
+      52,    25,    52,    -1,    52,    27,    52,    -1,    52,    26,
+      52,    -1,    52,    22,    52,    -1,    52,    23,    52,    -1,
+      52,    21,    52,    -1,    52,    20,    52,    -1,    29,    52,
+      -1,    32,    52,    -1,    13,    52,    14,    -1,    49,    -1,
+       3,    -1,    19,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,   127,   127,   134,   137,   142,   145,   146,   149,   152,
-     156,   161,   164,   168,   173,   175,   178,   181,   183,   184,
-     185,   186,   187,   191,   192,   193,   196,   197,   200,   203,
-     204,   207,   210,   211,   214,   220,   221,   222,   223,   224,
-     225,   226,   227,   228,   229,   230,   231,   232,   233,   234,
-     235,   236
+       0,   474,   474,   479,   483,   487,   489,   494,   497,   499,
+     505,   509,   511,   515,   517,   522,   525,   527,   530,   532,
+     536,   540,   545,   549,   553,   556,   561,   565,   569,   570,
+     572,   578,   582,   586,   591,   595,   597,   601,   605,   609,
+     613,   617,   621,   625,   629,   633,   637,   641,   645,   649,
+     653,   657,   661,   665
 };
 #endif
 
@@ -580,9 +900,9 @@ static const char *const yytname[] =
   "OPENBLOCK", "CLOSEBLOCK", "ENDEXPRESSION", "SEPARADOR", "IDENTIFIER",
   "OR", "AND", "EQUAL", "DIFF", "LESS", "LESSEQUAL", "GREATEQUAL", "GREAT",
   "PLUS", "MINUS", "MULT", "DIV", "NOT", "UMINUS", "$accept", "programa",
-  "inicio", "decvar", "decfunc", "paramlist", "looparams", "bloco",
-  "loopdecvar", "loopstmts", "stmt", "declaracao", "assign", "funccall",
-  "arglist", "loopargs", "exp", 0
+  "inicio", "decvar", "loopatrib", "decfunc", "paramlist", "looparams",
+  "bloco", "loopdecvar", "loopstmts", "stmt", "declaracao", "loopexp",
+  "assign", "funccall", "arglist", "loopargs", "exp", 0
 };
 #endif
 
@@ -601,23 +921,23 @@ static const yytype_uint16 yytoknum[] =
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    34,    35,    36,    36,    36,    37,    37,    38,    38,
-      39,    40,    40,    41,    42,    42,    43,    43,    44,    44,
-      44,    44,    44,    44,    44,    44,    45,    45,    46,    47,
-      47,    48,    49,    49,    50,    50,    50,    50,    50,    50,
-      50,    50,    50,    50,    50,    50,    50,    50,    50,    50,
-      50,    50
+       0,    34,    35,    36,    36,    36,    37,    38,    38,    39,
+      40,    40,    41,    41,    42,    43,    43,    44,    44,    45,
+      45,    45,    45,    45,    45,    45,    46,    46,    47,    47,
+      48,    49,    49,    50,    51,    51,    52,    52,    52,    52,
+      52,    52,    52,    52,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    52
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     2,     2,     0,     3,     5,     6,     5,
-       2,     3,     0,     4,     2,     0,     2,     0,     2,     5,
-       7,     5,     3,     2,     2,     2,     1,     1,     3,     4,
-       3,     2,     3,     0,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     3,     3,     3,     2,     2,     3,     1,
-       1,     1
+       0,     2,     1,     2,     2,     0,     4,     2,     0,     6,
+       2,     0,     3,     0,     4,     2,     0,     2,     0,     2,
+       5,     6,     5,     3,     2,     2,     1,     1,     1,     0,
+       3,     4,     3,     2,     3,     0,     3,     3,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     3,     2,     2,
+       3,     1,     1,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -625,49 +945,49 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       5,     0,     0,     0,     2,     5,     5,     0,     0,     1,
-       3,     4,     0,     0,     6,     0,    12,     0,    50,     0,
-      51,     0,     0,    49,     0,    15,     9,     0,    10,     0,
-       0,     0,    46,    47,     7,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,    15,    17,    12,
-       8,    48,    30,     0,    33,    45,    44,    42,    43,    38,
-      39,    41,    40,    34,    35,    36,    37,    14,     0,     0,
-       0,     0,     0,     0,     0,    17,     0,    26,    27,    11,
-      29,     0,    31,    23,     0,     0,     0,    25,    24,     0,
-      13,    16,    18,    33,    22,     0,     0,    28,    32,     0,
-       0,    19,    21,     0,    20
+       5,     0,     0,     0,     2,     5,     5,     0,     8,     1,
+       3,     4,    11,     0,     0,    13,     0,    52,     0,    53,
+       0,     0,    51,     7,     6,     0,    10,     0,     0,     0,
+      48,    49,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,    13,    16,     9,    50,    32,     0,
+      35,    47,    46,    44,    45,    40,    41,    43,    42,    36,
+      37,    38,    39,    12,    16,    18,    31,     0,    33,    15,
+      29,     0,     0,     0,     0,     0,     0,    18,     0,    26,
+      27,    35,     0,    28,     0,     0,    25,    24,     0,    14,
+      17,    19,    34,    23,     0,     0,    30,     0,     0,     0,
+      20,    22,    21
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     4,     5,     6,    17,    28,    26,    48,    74,
-      75,    76,    77,    23,    53,    82,    24
+      -1,     3,     4,     5,    14,     6,    16,    26,    46,    65,
+      76,    77,    78,    82,    79,    22,    49,    68,    23
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -43
+#define YYPACT_NINF -65
 static const yytype_int16 yypact[] =
 {
-      11,    -8,    -3,     3,   -43,    11,    11,    19,    -9,   -43,
-     -43,   -43,    -7,    54,   -43,    24,    29,    35,   -43,    54,
-      32,    54,    54,   -43,   118,    48,   -43,    36,   -43,    24,
-      67,    27,   -43,   -43,   -43,    54,    54,    54,    54,    54,
-      54,    54,    54,    54,    54,    54,    54,    48,   160,    29,
-     -43,   -43,   -43,    44,   162,   185,   195,   203,   203,     7,
-       7,     7,     7,    12,    12,   -43,   -43,   -43,    31,    49,
-      52,    58,    59,     0,    45,   160,    60,   -43,   -43,   -43,
-     -43,    54,   -43,   -43,   133,    54,    54,   -43,   -43,    54,
-     -43,   -43,   -43,   162,   -43,    85,   103,   174,   -43,    24,
-      24,    70,   -43,    24,   -43
+       4,   -15,    12,    33,   -65,     4,     4,    41,    34,   -65,
+     -65,   -65,    17,    26,    40,    46,    49,   -65,    26,    55,
+      26,    26,   -65,   113,   -65,    50,   -65,    70,    51,    24,
+     -65,   -65,    26,    26,    26,    26,    26,    26,    26,    26,
+      26,    26,    26,    26,    46,    78,   -65,   -65,   -65,    72,
+     101,   124,   134,   142,   142,    31,    31,    31,    31,    10,
+      10,   -65,   -65,   -65,    78,    23,   -65,    26,   -65,   -65,
+      26,    74,    75,    85,    86,    -4,    88,    23,    89,   -65,
+     -65,   101,   103,   113,    26,    26,   -65,   -65,    26,   -65,
+     -65,   -65,   -65,   -65,    69,    87,   113,    -3,    70,    70,
+     -65,   -65,   -65
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -43,   -43,    47,   -16,   -43,   -43,    17,   -29,    33,     4,
-     -43,   -43,   -43,   -42,   -43,   -11,   -17
+     -65,   -65,    45,   -38,   -65,   -65,   -65,    61,   -51,   110,
+      98,   -65,   -65,   -65,   -65,   -64,   -65,    95,   -18
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -677,75 +997,63 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      50,    13,    30,     9,    32,    33,    78,    15,    14,    47,
-      89,     7,    16,    31,    54,     1,     8,     2,    55,    56,
-      57,    58,    59,    60,    61,    62,    63,    64,    65,    66,
-      18,    47,    12,    78,    18,    43,    44,    45,    46,    25,
-      19,    52,    45,    46,    19,    31,    20,    27,    83,    29,
-      20,    84,    10,    11,     2,    49,    21,    18,    80,    22,
-      21,    90,    85,    22,    93,    86,    79,    19,    95,    96,
-     101,   102,    97,    20,   104,    87,    88,    92,   103,    91,
-      67,    51,    98,    21,     0,     0,    22,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    45,    46,    99,
-       0,     0,     0,     0,     0,    35,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    45,    46,   100,     0,     0,
-       0,     0,     0,    35,    36,    37,    38,    39,    40,    41,
-      42,    43,    44,    45,    46,    34,     0,     0,    35,    36,
-      37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
-      94,     0,     0,    35,    36,    37,    38,    39,    40,    41,
-      42,    43,    44,    45,    46,    68,     0,    69,     0,    70,
-       0,    71,    72,     0,     0,     0,     0,     0,     0,    73,
-      81,     0,    35,    36,    37,    38,    39,    40,    41,    42,
-      43,    44,    45,    46,    35,    36,    37,    38,    39,    40,
-      41,    42,    43,    44,    45,    46,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    45,    46,    37,    38,    39,
-      40,    41,    42,    43,    44,    45,    46,    39,    40,    41,
-      42,    43,    44,    45,    46
+      28,    80,    30,    31,     7,    99,    88,    64,     1,    29,
+       2,    50,    45,    80,    51,    52,    53,    54,    55,    56,
+      57,    58,    59,    60,    61,    62,    64,    17,    70,    17,
+      71,     8,    72,     9,    73,    74,    15,    18,    48,    18,
+      42,    43,    75,    19,    13,    19,   100,   101,   102,    81,
+      10,    11,    83,    20,    12,    20,    21,    24,    21,    40,
+      41,    42,    43,    27,    25,    47,    94,    95,    29,    44,
+      96,    32,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    97,     2,    45,    66,    84,    85,    32,
+      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
+      43,    98,    86,    87,    89,    63,    91,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    67,
+      93,    32,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,    43,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,    43,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,    43,    36,    37,    38,    39,
+      40,    41,    42,    43,    69,    90,    92
 };
 
-static const yytype_int8 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      29,    10,    19,     0,    21,    22,    48,    14,    17,    25,
-      10,    19,    19,    13,    31,     4,    19,     6,    35,    36,
-      37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
-       3,    47,    13,    75,     3,    28,    29,    30,    31,    15,
-      13,    14,    30,    31,    13,    13,    19,    18,    17,    14,
-      19,    68,     5,     6,     6,    19,    29,     3,    14,    32,
-      29,    16,    13,    32,    81,    13,    49,    13,    85,    86,
-      99,   100,    89,    19,   103,    17,    17,    17,     8,    75,
-      47,    14,    93,    29,    -1,    -1,    32,    20,    21,    22,
-      23,    24,    25,    26,    27,    28,    29,    30,    31,    14,
-      -1,    -1,    -1,    -1,    -1,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    14,    -1,    -1,
-      -1,    -1,    -1,    20,    21,    22,    23,    24,    25,    26,
-      27,    28,    29,    30,    31,    17,    -1,    -1,    20,    21,
-      22,    23,    24,    25,    26,    27,    28,    29,    30,    31,
-      17,    -1,    -1,    20,    21,    22,    23,    24,    25,    26,
-      27,    28,    29,    30,    31,     5,    -1,     7,    -1,     9,
-      -1,    11,    12,    -1,    -1,    -1,    -1,    -1,    -1,    19,
-      18,    -1,    20,    21,    22,    23,    24,    25,    26,    27,
-      28,    29,    30,    31,    20,    21,    22,    23,    24,    25,
-      26,    27,    28,    29,    30,    31,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    24,    25,    26,
-      27,    28,    29,    30,    31
+      18,    65,    20,    21,    19,     8,    10,    45,     4,    13,
+       6,    29,    15,    77,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,    43,    64,     3,     5,     3,
+       7,    19,     9,     0,    11,    12,    19,    13,    14,    13,
+      30,    31,    19,    19,    10,    19,    97,    98,    99,    67,
+       5,     6,    70,    29,    13,    29,    32,    17,    32,    28,
+      29,    30,    31,    14,    18,    14,    84,    85,    13,    19,
+      88,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    14,     6,    15,    14,    13,    13,    20,
+      21,    22,    23,    24,    25,    26,    27,    28,    29,    30,
+      31,    14,    17,    17,    16,    44,    17,    20,    21,    22,
+      23,    24,    25,    26,    27,    28,    29,    30,    31,    18,
+      17,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    20,    21,    22,    23,    24,    25,    26,
+      27,    28,    29,    30,    31,    21,    22,    23,    24,    25,
+      26,    27,    28,    29,    30,    31,    22,    23,    24,    25,
+      26,    27,    28,    29,    30,    31,    24,    25,    26,    27,
+      28,    29,    30,    31,    64,    77,    81
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     4,     6,    35,    36,    37,    38,    19,    19,     0,
-      36,    36,    13,    10,    17,    14,    19,    39,     3,    13,
-      19,    29,    32,    47,    50,    15,    41,    18,    40,    14,
-      50,    13,    50,    50,    17,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    37,    42,    19,
-      41,    14,    14,    48,    50,    50,    50,    50,    50,    50,
-      50,    50,    50,    50,    50,    50,    50,    42,     5,     7,
-       9,    11,    12,    19,    43,    44,    45,    46,    47,    40,
-      14,    18,    49,    17,    50,    13,    13,    17,    17,    10,
-      16,    43,    17,    50,    17,    50,    50,    50,    49,    14,
-      14,    41,    41,     8,    41
+       0,     4,     6,    35,    36,    37,    39,    19,    19,     0,
+      36,    36,    13,    10,    38,    19,    40,     3,    13,    19,
+      29,    32,    49,    52,    17,    18,    41,    14,    52,    13,
+      52,    52,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    19,    15,    42,    14,    14,    50,
+      52,    52,    52,    52,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    41,    37,    43,    14,    18,    51,    43,
+       5,     7,     9,    11,    12,    19,    44,    45,    46,    48,
+      49,    52,    47,    52,    13,    13,    17,    17,    10,    16,
+      44,    17,    51,    17,    52,    52,    52,    14,    14,     8,
+      42,    42,    42
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1560,290 +1868,392 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 127 "sintatico.y"
+#line 474 "sintatico.y"
     { 
-                                                                //printf("1 ");
-                                                                printf("[program  ");
-                                                             
-                                                            ;}
+                                                                           // printf("1 ");
+                                                                            createNAryASTree((yyvsp[(1) - (1)].ASTp));  
+                                                                        ;}
     break;
 
   case 3:
-#line 134 "sintatico.y"
+#line 479 "sintatico.y"
     {
-                                                            printf("2 ");
-                                                            ;}
+                                                                            //printf("2 ");
+                                                                            (yyval.ASTp) = allocTreeNode(LSTMT,2,(yyvsp[(1) - (2)].ASTp),(yyvsp[(2) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 4:
-#line 137 "sintatico.y"
+#line 483 "sintatico.y"
     { 
-                                                            //printf("3 ");
-                                                            printf("[decfunc  ");
-                                                              
-                                                            ;}
+                                                                           // printf("3 ");
+                                                                            (yyval.ASTp) = allocTreeNode(LSTMT, 2, (yyvsp[(1) - (2)].ASTp), (yyvsp[(2) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 5:
-#line 142 "sintatico.y"
-    {/*printf("46 ");*/;}
+#line 487 "sintatico.y"
+    {(yyval.ASTp) = NULL;;}
     break;
 
   case 6:
-#line 145 "sintatico.y"
-    { printf("4 ");/*fprintf(yyout, "  [%s]\n", $2); */;}
+#line 489 "sintatico.y"
+    { 
+                                                                         // printf("4 ");
+                                                                          (yyval.ASTp) = allocTreeNode(LTIPAGEM, 2, allocID((yyvsp[(2) - (4)].string)), (yyvsp[(3) - (4)].ASTp)); 
+                                                                        ;}
     break;
 
   case 7:
-#line 146 "sintatico.y"
-    { printf("5 ");/*fprintf(yyout, "  [%s]\n", $2);*/ ;}
+#line 494 "sintatico.y"
+    {
+                                                                            (yyval.ASTp) = allocTreeNode(LENDEXPRESSION, 1, (yyvsp[(2) - (2)].ASTp)); 
+                                                                        ;}
     break;
 
   case 8:
-#line 149 "sintatico.y"
-    { //printf("6 ");
-                                                                  //printf("[ %s   ", $2);  
-                                                                ;}
+#line 497 "sintatico.y"
+    {(yyval.ASTp) = NULL;;}
     break;
 
   case 9:
-#line 152 "sintatico.y"
-    {printf("7 ");;}
+#line 499 "sintatico.y"
+    { 
+                                                                        //printf("6-DEFFUNC ");
+                                                                        (yyval.ASTp) = allocTreeNode(LDEF, 3, allocID((yyvsp[(2) - (6)].string)), (yyvsp[(4) - (6)].ASTp), (yyvsp[(6) - (6)].ASTp));
+                                                                        ;}
     break;
 
   case 10:
-#line 156 "sintatico.y"
-    { //printf("8 ");/*lista  = insereLista(lista, $1); */
-                                                              //printf("[%s] ", $1);    
-                                                            ;}
+#line 505 "sintatico.y"
+    { 
+                                                                        //printf("8 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LPARAM, 2, allocID((yyvsp[(1) - (2)].string)),(yyvsp[(2) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 11:
-#line 161 "sintatico.y"
-    {//printf("9 "); /*lista  = insereLista(lista, $2);*/
-                                                            //printf("[%s] ", $2);
-                                                            ;}
+#line 509 "sintatico.y"
+    {(yyval.ASTp) = NULL;;}
     break;
 
   case 12:
-#line 164 "sintatico.y"
-    {;}
+#line 511 "sintatico.y"
+    {
+                                                                        //printf("9 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LCOMPPARAM, 2, allocID((yyvsp[(2) - (3)].string)),(yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 13:
-#line 168 "sintatico.y"
-    {//printf("10 ");
-                                                             //printf("[%s\n ] ", $1);
-                                                            ;}
+#line 515 "sintatico.y"
+    {(yyval.ASTp) = NULL ;;}
     break;
 
   case 14:
-#line 173 "sintatico.y"
-    {printf("11 ");
-                                                            ;}
+#line 517 "sintatico.y"
+    {
+                                                                        //printf("10 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LBLOCK, 3, (yyvsp[(2) - (4)].ASTp), (yyvsp[(3) - (4)].ASTp));
+                                                                        ;}
     break;
 
   case 15:
-#line 175 "sintatico.y"
-    {;}
+#line 522 "sintatico.y"
+    {//printf("11 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LDECVAR, 2, (yyvsp[(1) - (2)].ASTp), (yyvsp[(2) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 16:
-#line 178 "sintatico.y"
-    {printf("12 "); 
-                                                            // printf("[%s] ", $1);
-                                                            ;}
+#line 525 "sintatico.y"
+    {(yyval.ASTp) = NULL ;;}
     break;
 
   case 17:
-#line 181 "sintatico.y"
-    {;}
+#line 527 "sintatico.y"
+    {//printf("12 "); 
+                                                                        (yyval.ASTp) = allocTreeNode(LVOLTASTMT, 2, (yyvsp[(1) - (2)].ASTp), (yyvsp[(2) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 18:
-#line 183 "sintatico.y"
-    {printf("13 ");;}
+#line 530 "sintatico.y"
+    {(yyval.ASTp) = NULL ;;}
     break;
 
   case 19:
-#line 184 "sintatico.y"
-    {printf("14 ");;}
+#line 532 "sintatico.y"
+    {
+                                                                        //printf("220 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LSTMTFUNCCALL, 1, (yyvsp[(1) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 20:
-#line 185 "sintatico.y"
-    {printf("15 ");;}
+#line 536 "sintatico.y"
+    {
+                                                                        //printf("15 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LSTMTIF, 3, (yyvsp[(3) - (5)].ASTp), (yyvsp[(5) - (5)].ASTp));
+                                                                        ;}
     break;
 
   case 21:
-#line 186 "sintatico.y"
-    {printf("16 ");;}
+#line 540 "sintatico.y"
+    {
+                                                                        //printf("15 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LSTMTIF, 3, (yyvsp[(3) - (6)].ASTp), (yyvsp[(5) - (6)].string), (yyvsp[(6) - (6)].ASTp));
+                                                                        ;}
     break;
 
   case 22:
-#line 187 "sintatico.y"
+#line 545 "sintatico.y"
     {
-                                                            printf("17 ");
-                                                            printf("[return  ");
-                                                            ;}
+                                                                        //printf("16 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LWHILE, 2, (yyvsp[(3) - (5)].ASTp), (yyvsp[(5) - (5)].ASTp)); 
+                                                                        ;}
     break;
 
   case 23:
-#line 191 "sintatico.y"
-    {printf("[return ] ");;}
+#line 549 "sintatico.y"
+    {
+                                                                        //printf("17 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LLABELRETURN, 1, (yyvsp[(2) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 24:
-#line 192 "sintatico.y"
-    {printf("19 ");;}
+#line 553 "sintatico.y"
+    {
+                                                                        (yyval.ASTp) = allocTreeNode(LLABELBREAK, 2, (yyvsp[(1) - (2)].string), (yyvsp[(2) - (2)].string));
+                                                                        ;}
     break;
 
   case 25:
-#line 193 "sintatico.y"
-    {printf("20 ");;}
+#line 556 "sintatico.y"
+    {
+                                                                        //printf("20 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LLABELCONTINUE,2,(yyvsp[(1) - (2)].string), (yyvsp[(2) - (2)].string)); 
+                                                                        ;}
     break;
 
   case 26:
-#line 196 "sintatico.y"
-    {printf("21 ");;}
+#line 561 "sintatico.y"
+    {
+                                                                        //printf("ASSIGN ");
+                                                                        (yyval.ASTp) = allocTreeNode(LASSIGNSTMT, 1, (yyvsp[(1) - (1)].ASTp));
+                                                                        ;}
     break;
 
   case 27:
-#line 197 "sintatico.y"
-    {printf("22 ");;}
+#line 565 "sintatico.y"
+    {
+                                                                        (yyval.ASTp) = allocTreeNode(LFUNCCALL, 2, (yyvsp[(1) - (1)].ASTp));
+                                                                        ;}
     break;
 
   case 28:
-#line 200 "sintatico.y"
-    {printf("23 ");;}
+#line 569 "sintatico.y"
+    {(yyval.ASTp) = allocTreeNode(LEXP, 1, (yyvsp[(1) - (1)].ASTp));;}
     break;
 
   case 29:
-#line 203 "sintatico.y"
-    {printf("24 ");;}
+#line 570 "sintatico.y"
+    {(yyval.ASTp)=NULL;;}
     break;
 
   case 30:
-#line 204 "sintatico.y"
-    {printf("25 ");;}
+#line 572 "sintatico.y"
+    {
+                                                                        //printf("23 ");
+                                                                        //$$ = allocTreeNode(LASSIGNSTMT, 1, $1);
+                                                                        (yyval.ASTp) = allocTreeNode(LCOMPASSIGN, 2, allocID((yyvsp[(1) - (3)].string)), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 31:
-#line 207 "sintatico.y"
-    {printf("26 ");;}
+#line 578 "sintatico.y"
+    {
+                                                                        //printf("24 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LFUNCCALL, 2, allocID((yyvsp[(1) - (4)].string)), (yyvsp[(3) - (4)].ASTp));
+                                                                        ;}
     break;
 
   case 32:
-#line 210 "sintatico.y"
-    {printf("27 ");;}
+#line 582 "sintatico.y"
+    {
+                                                                        (yyval.ASTp) = allocTreeNode(LFUNCCALL, 2, allocID((yyvsp[(1) - (3)].string)));
+                                                                        ;}
     break;
 
   case 33:
-#line 211 "sintatico.y"
-    {;}
+#line 586 "sintatico.y"
+    {
+                                                                        //printf("26 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LLABELFUNCCALL, 1, (yyvsp[(1) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 34:
-#line 214 "sintatico.y"
+#line 591 "sintatico.y"
     {
-                                                            //printf("28 ");
-                                                            //printf("[+] [%d][%d] ", $1,$3);
-                                                            //$$ = $1 + $3;
-                                                           // printf("%d", $$);
-                                                            ;}
+                                                                         //printf("27 ");
+                                                                         (yyval.ASTp) = allocTreeNode(LLABELFUNCCALL, 2, (yyvsp[(1) - (3)].string), (yyvsp[(2) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 35:
-#line 220 "sintatico.y"
-    {printf("29 ");;}
+#line 595 "sintatico.y"
+    {(yyval.ASTp)=NULL;;}
     break;
 
   case 36:
-#line 221 "sintatico.y"
-    {printf("30 ");;}
+#line 597 "sintatico.y"
+    {
+                                                                        //printf("28 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LPLUS, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 37:
-#line 222 "sintatico.y"
-    {printf("31 ");;}
+#line 601 "sintatico.y"
+    {
+                                                                        //printf("29 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LMINUS, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp)); 
+                                                                        ;}
     break;
 
   case 38:
-#line 223 "sintatico.y"
-    {printf("32 ");;}
+#line 605 "sintatico.y"
+    {
+                                                                        //printf("30 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LMULT, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 39:
-#line 224 "sintatico.y"
-    {printf("33 ");;}
+#line 609 "sintatico.y"
+    {
+                                                                        //printf("31 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LDIV, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 40:
-#line 225 "sintatico.y"
-    {printf("34 ");;}
+#line 613 "sintatico.y"
+    {
+                                                                        //printf("32 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LLESS, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 41:
-#line 226 "sintatico.y"
-    {printf("35 ");;}
+#line 617 "sintatico.y"
+    {
+                                                                        //printf("33 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LLESSEQUAL, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp)); 
+                                                                        ;}
     break;
 
   case 42:
-#line 227 "sintatico.y"
-    {printf("36 ");;}
+#line 621 "sintatico.y"
+    {
+                                                                        //printf("34 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LGREAT, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 43:
-#line 228 "sintatico.y"
-    {printf("37 ");;}
+#line 625 "sintatico.y"
+    {
+                                                                        //printf("35 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LGREATEQUAL, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 44:
-#line 229 "sintatico.y"
-    {printf("38 ");;}
+#line 629 "sintatico.y"
+    {
+                                                                        //printf("36 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LEQUAL, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 45:
-#line 230 "sintatico.y"
-    {printf("39 ");;}
+#line 633 "sintatico.y"
+    {
+//                                                                      printf("37 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LDIFF, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 46:
-#line 231 "sintatico.y"
-    {printf("40 ");;}
+#line 637 "sintatico.y"
+    {
+                                                                        //printf("38 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LAND, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 47:
-#line 232 "sintatico.y"
-    {printf("41 ");;}
+#line 641 "sintatico.y"
+    {
+                                                                        //printf("39 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LOR, 2, (yyvsp[(1) - (3)].ASTp), (yyvsp[(3) - (3)].ASTp));
+                                                                        ;}
     break;
 
   case 48:
-#line 233 "sintatico.y"
-    {printf("42 ");;}
+#line 645 "sintatico.y"
+    {
+                                                                        //printf("40 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LUMINUS, 1, (yyvsp[(2) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 49:
-#line 234 "sintatico.y"
-    {printf("43 ");;}
+#line 649 "sintatico.y"
+    {
+                                                                        //printf("41 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LNOT, 1, (yyvsp[(2) - (2)].ASTp));
+                                                                        ;}
     break;
 
   case 50:
-#line 235 "sintatico.y"
-    {printf("44 ");;}
+#line 653 "sintatico.y"
+    {
+                                                                        //printf("42 ");
+                                                                        (yyval.ASTp) = allocTreeNode(LOPENPAR, 1, (yyvsp[(2) - (3)].ASTp)); 
+                                                                        ;}
     break;
 
   case 51:
-#line 236 "sintatico.y"
+#line 657 "sintatico.y"
     {
-                                                            //printf("45 ");
-                                                           // printf("[%s] ", $1);
-                                                            ;}
+                                                                        //printf("43 ");
+                                                                        { (yyval.ASTp) = allocTreeNode(LLABELFUNCCALL, 2, (yyvsp[(1) - (1)].ASTp)); }
+                                                                        ;}
+    break;
+
+  case 52:
+#line 661 "sintatico.y"
+    {
+                                                                        //printf("44 ");
+                                                                        (yyval.ASTp) = allocINT((yyvsp[(1) - (1)].intval));
+                                                                        ;}
+    break;
+
+  case 53:
+#line 665 "sintatico.y"
+    {
+                                                                        //printf("45 ");
+                                                                        (yyval.ASTp) = allocID((yyvsp[(1) - (1)].string));
+                                                                        ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1847 "sintatico.tab.c"
+#line 2257 "sintatico.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2057,101 +2467,13 @@ yyreturn:
 }
 
 
-#line 241 "sintatico.y"
+#line 670 "sintatico.y"
 
 
-/*################ AST DEFINITIONS #####################*/
-
-
-//Estrutura para gerar um buffer de Strings
-typedef struct stringBuffer{
-    char palavra[BUFFERMAX];
-    struct stringBuffer* prox;
-}stringBuffer;
-
-//Função Insere Início da Lista Encadeada
-stringBuffer* insereLista(stringBuffer* l, char palavra[]){
-    stringBuffer* novo = (stringBuffer*)malloc(sizeof(stringBuffer));
-    int i;
-
-    for (i=0; i<strlen(palavra); i++) {
-        novo->palavra[i] = palavra[i];
-    }
-    novo->palavra[strlen(palavra)] = '\0';
-    novo->prox = l;
-    COUNTER++;
-
-    return novo;
-}
-
-//Função Imprime buffer de String
-void imprimeLista(stringBuffer* l){
-    int i = 1;
-    do{
-        
-        if( l->prox != NULL){
-            if(COUNTER-1 == i){
-                fprintf(yyout, "[%s]", l->palavra);
-                //printf("[%s]", l->palavra);
-            }else{
-                fprintf(yyout, "[%s] ", l->palavra);
-                //printf("[%s]", l->palavra);
-            }
-        }else{
-            
-            if(strcmp("", l->palavra) != 0){
-                fprintf(yyout, " [%s]", l->palavra);
-            }
-            
-        }
-
-        l= l->prox;
-        i++;
-    }while(l != NULL);
-}
-
-stringBuffer* lista     = NULL;
-
-ASTNode *allocINT(int valor);
-ASTNode *allocID(char string[MAXCHAR]);
-ASTNode *allocaTreeNode(int no_token, int nfilhos, ...);
-
-ASTNode *allocINT(int valor) {
-    ASTNode *newnode = malloc(sizeof(ASTNode));
-
-    newnode->tipo = INT;
-    newnode->integer.integer = valor;
-
-    return newnode;
-}
-ASTNode *allocID(char string[MAXCHAR]) {
-    ASTNode *newnode = malloc(sizeof(ASTNode));
-
-    newnode->tipo = ID;
-    strcpy(newnode->id.name, string);
-
-    return newnode;
-}
-ASTNode *allocaTreeNode(int token, int totalkids, ...) {
-    va_list ap;
-    
-    ASTNode *newnode = malloc(sizeof(ASTNode));
-    int i;
-
-    newnode->tree.kids = malloc(totalkids * sizeof(ASTNode *));
-    va_start(ap, totalkids);
-    
-    newnode->tipo               = AST;
-    newnode->tree.token         = token;
-    newnode->tree.totalkids     = totalkids;
-
-    i = 0;
-    while(i< totalkids){
-        newnode->tree.kids[i] = va_arg(ap, ASTNode*);
-        i++;
-    }
-    va_end(ap);
-    return newnode;
+int yyerror(const char *s) {
+  printf("yyerror : %s\n", s);
+  ERRORS++;
+  return 0;
 }
 
 int main(int argc, char** argv) {
@@ -2159,25 +2481,21 @@ int main(int argc, char** argv) {
     FILE *input  = fopen(argv[1], "r");
     FILE *output = fopen(argv[2], "w");  
     
-    //Initialize Tree
-    //tree = initializeNode();
-    
     yyin = input;
     yyout = output;
+    
+    fprintf(yyout,"[program");
 
-    do{
-
-        yyparse();
-
-    }while(!feof(yyin));
-
+    yyparse();
+    fprintf(yyout,"]");
+    
     fclose(input);
     fclose(output);
+    
+    //If errors, clear file
+    if(ERRORS != 0){
+        FILE *output = fopen(argv[2], "w");
+        fclose(output);
+    }
     return 0;
-}
-
-
-
-int yyerror(char *s) {
-  printf("yyerror : %s\n",s);
 }

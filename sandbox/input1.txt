@@ -1,4 +1,18 @@
-def add(x, y)
-{
-    return x + y;
+let f =0;
+def f(){
+	f = f +1;
+	return f;
 }
+
+let b;
+def main(){
+	let a;
+	if()
+}
+
+
+[program 
+[decvar [f] [0]] 
+[decfunc [f] [paramlist] 
+[block [assign [f] [+ [f] [1]]]
+ [return [f]]]] [decvar [b]] [decfunc [main] [paramlist] [block [decvar [a]] [if [|| [&& [>= [/ [- [+ [* [- [funccall [f] [arglist]]] [a]] [b]]] [5]] [3]] [! [|| [|| [<= [2] [5]] [> [2] [5]]] [!= [3] [3]]]]] [== [2] [2]]] [block [funccall [print] [arglist [8]]]]]]]]
