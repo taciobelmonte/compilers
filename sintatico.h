@@ -112,7 +112,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 400 "sintatico.y"
+#line 412 "sintatico.y"
 {
     ASTNode *ASTp;
     char *string;
