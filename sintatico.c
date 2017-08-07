@@ -162,7 +162,6 @@ ASTNode *allocTreeNode(int token, int totalkids, ...) {
     int i = 0;
     va_list list;
 
-        printf("criou node %d\n ", token);
     ASTNode *newnode = malloc(sizeof(ASTNode));
 
     newnode->tree.kids = malloc(totalkids*sizeof(ASTNode*));
@@ -230,7 +229,7 @@ void createASTreeType(ASTNode *tree){
             caseExpression(tree, "/",0, 1);
             break;
         case LUMINUS:
-            caseExpression(tree, "-",0, 1);
+            caseExpression(tree, "-",1, 1);
             break;
         case LAND:
             caseExpression(tree, "&&",0, 1);
@@ -266,14 +265,14 @@ void createASTreeType(ASTNode *tree){
             caseExpression(tree, "return",1, 1);
             break;
          case LSTMTIF:
-            fprintf(yyout, "[if ");
+            fprintf(yyout, " [if");
             createNAryASTree(tree->tree.kids[0]); 
             createNAryASTree(tree->tree.kids[1]);
             createNAryASTree(tree->tree.kids[2]);
             fprintf(yyout, "] "); 
             break;
         case LIF:
-            caseExpression(tree, "", 1, 0);
+            caseExpression(tree, "", 0, 0);
             if(tree->tree.totalkids>2)
                 createNAryASTree(tree->tree.kids[2]);
             break;
@@ -375,17 +374,16 @@ void createASTreeType(ASTNode *tree){
                 break;
         
         case LLABELFUNCCALL:
-            caseExpression(tree, "funccall",1, 1);
+            caseExpression(tree, "funccall",0, 1);
             break;
         
         case LFUNCCALL:
             if(tree->tree.kids[1] != NULL) {
-                fprintf(yyout," [%s]", tree->tree.kids[0]->id.name);
+                fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name);
                 createNAryASTree(tree->tree.kids[1]);
-            }
-            else {
-                fprintf(yyout," [%s]", tree->tree.kids[0]->id.name);
-                fprintf(yyout," [arglist]");
+            }else {
+                fprintf(yyout,"[%s] ", tree->tree.kids[0]->id.name);
+                fprintf(yyout,"[arglist]");
             }
          break;
             
@@ -396,10 +394,9 @@ void createASTreeType(ASTNode *tree){
             createNAryASTree(tree->tree.kids[0]);
             break;
        
-        
-        
         case LFUNCNNARGLIST:
-            caseExpression(tree, "",0, 0);
+            createNAryASTree( tree->tree.kids[0] );
+            createNAryASTree( tree->tree.kids[1] ); 
             break;
          
     }
@@ -517,7 +514,7 @@ decfunc     : DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco            {
                                                                           yyerror("print");
                                                                         }
             | DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco           {
-                                                                        printf("6-(decfunc (%s)) \n", $2);
+                                                                       // printf("6-(decfunc (%s)) \n", $2);
                                                                         $$ = allocTreeNode(LDEF,3, allocID($2), $4, $6);
                                                                         }
             ;
@@ -618,12 +615,12 @@ arglist:
             
 loopargs     : exp loopargs2                                            {
                                                                         printf("26 - [] \n");
-                                                                        $$ = allocTreeNode(LFUNCNNARGLIST, 1, $1);
+                                                                        $$ = allocTreeNode(LFUNCNNARGLIST, 2, $1, $2);
                                                                         }
             ;
 loopargs2    : SEPARADOR exp loopargs2                                  {
-                                                                         //printf("27 - (, [%s]) \n", $2);
-                                                                         $$ = allocTreeNode(LFUNCNNARGLIST, 2, $1, $2);
+                                                                        // printf("27 - (, [%d]) \n", $2);
+                                                                         $$ = allocTreeNode(LFUNCNNARGLIST, 2, $2, $3);
                                                                         }
             |                                                           {$$=NULL;}
             ;
