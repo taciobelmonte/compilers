@@ -1,6 +1,0 @@
-def print() {
-    let a = 3;
-}
- def main() {
-    let a= 4;
- }
