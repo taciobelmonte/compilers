@@ -33,19 +33,19 @@ errodiferente   ({digito})+(_|{letra}|{digito})*
                                                                                                                         yylval.intval = atoi(yytext);
                                                                                                                         return DEC;
                                                                                                                     }
-"||"                                                                                                                {return OR;}                                   
+"||"                                                                                                                {return OR;}
 "&&"                                                                                                                {return AND;}
 "=="                                                                                                                {return EQUAL;}
-"!="                                                                                                                {return DIFF;}                                               
+"!="                                                                                                                {return DIFF;}
 "<"                                                                                                                 {return LESS;}
-"<="                                                                                                                {return LESSEQUAL;}    
-">="                                                                                                                {return GREATEQUAL;} 
-">"                                                                                                                 {return GREAT;} 
-"+"                                                                                                                 {return PLUS;} 
-"-"                                                                                                                 {return MINUS;} 
-"*"                                                                                                                 {return MULT;}                                                                                                             
-"/"                                                                                                                 {return DIV;} 
-"!"                                                                                                                 {return NOT;}    
+"<="                                                                                                                {return LESSEQUAL;}
+">="                                                                                                                {return GREATEQUAL;}
+">"                                                                                                                 {return GREAT;}
+"+"                                                                                                                 {return PLUS;}
+"-"                                                                                                                 {return MINUS;}
+"*"                                                                                                                 {return MULT;}
+"/"                                                                                                                 {return DIV;}
+"!"                                                                                                                 {return NOT;}
 def                                                                                                                 {return DEF;}
 return                                                                                                              {return RETURN;}
 let                                                                                                                 {return LET;}
@@ -61,6 +61,11 @@ break                                                                           
 ")"                                                                                                                 {return CLOSEPAR;}
 "{"                                                                                                                 {return OPENBLOCK;}
 "}"                                                                                                                 {return CLOSEBLOCK;}
+"print"                                                                                                                {
+                                                                                                                    yylval.string = malloc(strlen(yytext));
+                                                                                                                    strncpy(yylval.string, yytext, strlen(yytext));
+                                                                                                                    return(PRINTAOLA);
+                                                                                                                    }
 {ID}                                                                                                                {
                                                                                                                     yylval.string = malloc(strlen(yytext));
                                                                                                                     strncpy(yylval.string, yytext, strlen(yytext));

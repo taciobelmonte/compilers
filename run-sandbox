@@ -4,3 +4,7 @@ echo "Teste 1"
 ./compilador sandbox/input1.txt sandbox/out1.txt
 diff sandbox/out1.txt sandbox/expected1.txt
 
+echo "Teste 2"
+./compilador sandbox/input2.txt sandbox/out2.txt
+diff sandbox/out2.txt sandbox/expected2.txt
+

@@ -21,7 +21,7 @@ lex.yy.c: lexico.l
 
 clean:
 	rm -f compilador
-	rm -f sandbox/out*
+	rm -f sandbox/out* *.y.* *.o sintatico.h *.lex.*
 
 runtests: all
 	./run-sandbox

@@ -7,7 +7,7 @@
 
 #define BUFFERMAX 2000
 #define MAXCHAR 500
-    
+
 //Instancia variáveis
 int yylex();
 int yyparse();
@@ -29,14 +29,14 @@ typedef enum typesList {
 
 //Keys to pass info to createNode in the AST
 typedef enum keyList{
-    LPLUS,    
+    LPLUS,
     LMINUS,
     LMULT,
     LDIV,
     LUMINUS,
     LAND,
     LOR,
-    LNOT    ,   
+    LNOT    ,
     LGREAT,
     LGREATEQUAL      ,
     LLESSEQUAL  ,
@@ -81,16 +81,16 @@ typedef struct{
 }nodeID;
 typedef struct {
     int token;
-    int totalkids;                                      
-    struct ASTNo **kids;	
+    int totalkids;
+    struct ASTNo **kids;
 }ASTree;
 
 typedef struct ASTNo{
     type tipo;
     union {
-        nodeINT integer;   
+        nodeINT integer;
         nodeID id;
-        ASTree tree;        
+        ASTree tree;
     };
 }ASTNode;
 /*################## AST STRUCTURE #################*/
@@ -108,7 +108,7 @@ stringBuffer* insereLista(stringBuffer* l, char palavra[]){
     stringBuffer* novo = (stringBuffer*)malloc(sizeof(stringBuffer));
     int i;
 
-    for (i=0; i<strlen(palavra); i++) 
+    for (i=0; i<strlen(palavra); i++)
         novo->palavra[i] = palavra[i];
 
     novo->palavra[strlen(palavra)] = '\0';
@@ -167,14 +167,14 @@ ASTNode *allocTreeNode(int token, int totalkids, ...) {
 
     newnode->tree.kids = malloc(totalkids*sizeof(ASTNode*));
     va_start( list, totalkids);
-    
+
     newnode->tipo               = AST;
     newnode->tree.token         = token;
     newnode->tree.totalkids     = totalkids;
 
     for(i =0; i < totalkids; i++)
          newnode->tree.kids[i] = va_arg(list, ASTNode*);
-    
+
     va_end(list);
     return newnode;
 }
@@ -187,7 +187,7 @@ void createNAryASTree(ASTNode *tree)
         if(tree->tipo == ID)
             fprintf(yyout," [%s]", tree->id.name);
         if(tree->tipo == INT)
-            fprintf(yyout," [%d]", tree->integer.integer);	
+            fprintf(yyout," [%d]", tree->integer.integer);
     }
 }
 
@@ -199,18 +199,18 @@ void createNAryASTree(ASTNode *tree)
  * @param type - 0 for BINOP ? 1 for UNOP ? 2 for 3 children
  */
 void caseExpression(ASTNode *tree, char* item, int type, int label){
-    
+
     if(label){
         fprintf(yyout, " [");
         fprintf(yyout, "%s", item);
     }
     //Create tree for first node
     createNAryASTree(tree->tree.kids[0]);
-    
+
     //Create tree for second node if is binop operation
     if(!type)
         createNAryASTree(tree->tree.kids[1]);
-    
+
     if(label)
         fprintf(yyout, "]");
 }
@@ -259,7 +259,7 @@ void createASTreeType(ASTNode *tree){
             break;
         case LDIFF:
             caseExpression(tree, "!=",0, 1);
-            break;  
+            break;
         case LWHILE:
             caseExpression(tree, "while",0, 1);
             break;
@@ -278,7 +278,7 @@ void createASTreeType(ASTNode *tree){
                 createNAryASTree(tree->tree.kids[2]);
             break;
         case LSTMT:
-            if(tree->tree.totalkids>=2){ 
+            if(tree->tree.totalkids>=2){
                 if(tree->tree.kids[0]!= NULL) {
                     caseExpression(tree, "", 1, 0);
                 }else {
@@ -288,27 +288,27 @@ void createASTreeType(ASTNode *tree){
             break;
         case LASSIGN:
             createNAryASTree(tree->tree.kids[0]);
-            fprintf(yyout, " [assign ");     
+            fprintf(yyout, " [assign ");
             fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
-            fprintf(yyout, "]");     
+            fprintf(yyout, "]");
             break;
         case LENDEXPRESSION:
-             createNAryASTree(tree->tree.kids[0]); 
-             fprintf(yyout, "]");  
+             createNAryASTree(tree->tree.kids[0]);
+             fprintf(yyout, "]");
             break;
         case LDECVAR:
-                createNAryASTree(tree->tree.kids[0]); 
-                if(tree->tree.kids[1] != NULL) 
-                    createNAryASTree(tree->tree.kids[1]); 
+                createNAryASTree(tree->tree.kids[0]);
+                if(tree->tree.kids[1] != NULL)
+                    createNAryASTree(tree->tree.kids[1]);
                 break;
         case LEXP:
-            createNAryASTree(tree->tree.kids[0]); 
+            createNAryASTree(tree->tree.kids[0]);
             break;
         case LSTMTSTMT:
-            createNAryASTree(tree->tree.kids[0]); 
+            createNAryASTree(tree->tree.kids[0]);
             break;
         case LTIPAGEM:
-            if( tree->tree.totalkids>=2){ 
+            if( tree->tree.totalkids>=2){
                 if(tree->tree.kids[1]!= NULL) {
                     fprintf(yyout, " [decvar ");
                     fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
@@ -328,18 +328,18 @@ void createASTreeType(ASTNode *tree){
                 break;
         case LPARAM:
                 fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
-                createNAryASTree(tree->tree.kids[1]);			           
+                createNAryASTree(tree->tree.kids[1]);
                 fprintf(yyout, "]");
                 break;
         case LCOMPPARAM:
                 fprintf(yyout, " [%s]",tree->tree.kids[0]->id.name);
-                createNAryASTree(tree->tree.kids[1]);			           
+                createNAryASTree(tree->tree.kids[1]);
                 break;
         case LBLOCK:
                 fprintf(yyout, " [block");
-                if(tree->tree.kids[0] != NULL) 
+                if(tree->tree.kids[0] != NULL)
                     createNAryASTree(tree->tree.kids[0]);
-                if(tree->tree.kids[1] != NULL) 
+                if(tree->tree.kids[1] != NULL)
                         createNAryASTree(tree->tree.kids[1]);
                 fprintf(yyout, "]");
                 break;
@@ -348,14 +348,14 @@ void createASTreeType(ASTNode *tree){
                 createNAryASTree(tree->tree.kids[0]);
                 break;
          case LCOMPASSIGN:
-                fprintf(yyout, "[%s] ", tree->tree.kids[0]->id.name);   
-                createNAryASTree(tree->tree.kids[1]); 
+                fprintf(yyout, "[%s] ", tree->tree.kids[0]->id.name);
+                createNAryASTree(tree->tree.kids[1]);
                 fprintf(yyout, "]");
                 break;
          case LVOLTASTMT:
-                createNAryASTree(tree->tree.kids[0]); 
+                createNAryASTree(tree->tree.kids[0]);
                  if(tree->tree.kids[1] != NULL)
-                    createNAryASTree(tree->tree.kids[1]); 
+                    createNAryASTree(tree->tree.kids[1]);
                 break;
          case LLABELBREAK:
                 fprintf(yyout, " [break]");
@@ -368,7 +368,7 @@ void createASTreeType(ASTNode *tree){
                 break;
          case LSTMTFUNCCALL:
                 fprintf(yyout," [funccall ");
-                createNAryASTree(tree->tree.kids[0]); 
+                createNAryASTree(tree->tree.kids[0]);
                 fprintf(yyout,"]");
                 break;
          case LFUNCNARGLIST:
@@ -382,11 +382,11 @@ void createASTreeType(ASTNode *tree){
             break;
          case LFUNCCALL:
             if(tree->tree.kids[1] != NULL) {
-                fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name); 
-                createNAryASTree(tree->tree.kids[1]); 
+                fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name);
+                createNAryASTree(tree->tree.kids[1]);
             }
             else {
-                fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name); 
+                fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name);
                 fprintf(yyout,"[arglist]");
             }
          break;
@@ -398,68 +398,69 @@ void createASTreeType(ASTNode *tree){
 
 //Define types
 %union{
-    ASTNode *ASTp;  
+    ASTNode *ASTp;
     char *string;
     int intval;
 };
 
 //TERMINALS
 %token <intval>DEC
-%token <string>DEF 
-%token <string>RETURN 
-%token <string>LET 
-%token <string>IF 
-%token <string>ELSE 
-%token <string>WHILE 
-%token <string>ASSIGN 
-%token <string>CONTINUE 
+%token <string>DEF
+%token <string>RETURN
+%token <string>LET
+%token <string>IF
+%token <string>ELSE
+%token <string>WHILE
+%token <string>ASSIGN
+%token <string>CONTINUE
 %token <string>BREAK
-%token <string>OPENPAR 
-%token <string>CLOSEPAR 
-%token <string>OPENBLOCK 
+%token <string>OPENPAR
+%token <string>CLOSEPAR
+%token <string>OPENBLOCK
 %token <string>CLOSEBLOCK
-%token <string>ENDEXPRESSION 
-%token <string>SEPARADOR 
+%token <string>ENDEXPRESSION
+%token <string>SEPARADOR
 %token <string>IDENTIFIER
+%token <string>PRINTAOLA
 %token <string>OR
-%token <string>AND 
-%token <string>EQUAL 
-%token <string>DIFF 
-%token <string>LESS 
-%token <string>LESSEQUAL 
-%token <string>GREATEQUAL 
-%token <string>GREAT 
-%token <string>PLUS 
-%token <string>MINUS 
-%token <string>MULT 
-%token <string>DIV 
-%token <string>NOT 
+%token <string>AND
+%token <string>EQUAL
+%token <string>DIFF
+%token <string>LESS
+%token <string>LESSEQUAL
+%token <string>GREATEQUAL
+%token <string>GREAT
+%token <string>PLUS
+%token <string>MINUS
+%token <string>MULT
+%token <string>DIV
+%token <string>NOT
 
 //NON TERMINALS
-%type <ASTp> inicio 
-%type <ASTp> exp 
-%type <ASTp> programa 
-%type <ASTp> decvar 
-%type <ASTp> loopdecvar 
-%type <ASTp> decfunc 
-%type <ASTp> paramlist 
-%type <ASTp> looparams 
+%type <ASTp> inicio
+%type <ASTp> exp
+%type <ASTp> programa
+%type <ASTp> decvar
+%type <ASTp> loopdecvar
+%type <ASTp> decfunc
+%type <ASTp> paramlist
+%type <ASTp> looparams
 %type <ASTp> bloco
-%type <ASTp> loopstmts 
-%type <ASTp> assign 
-%type <ASTp> stmt 
+%type <ASTp> loopstmts
+%type <ASTp> assign
+%type <ASTp> stmt
 %type <ASTp> funccall
-%type <ASTp> arglist 
-%type <ASTp> loopargs 
-%type <ASTp> loopatrib 
-%type <ASTp> loopexp 
+%type <ASTp> arglist
+%type <ASTp> loopargs
+%type <ASTp> loopatrib
+%type <ASTp> loopexp
 %type <ASTp> declaracao
 
 //Define Tokens that has been generated from Lexical Analyser
 %left OR
 %left AND
 %left EQUAL DIFF
-%left LESS LESSEQUAL GREATEQUAL GREAT 
+%left LESS LESSEQUAL GREATEQUAL GREAT
 %left PLUS MINUS//+
 %left MULT DIV//*
 %left NOT
@@ -471,38 +472,41 @@ void createASTreeType(ASTNode *tree){
 
 %%
 
-programa    :inicio                                                     { 
+programa    :inicio                                                     {
                                                                            // printf("1 ");
-                                                                            createNAryASTree($1);  
-                                                                        }   
+                                                                            createNAryASTree($1);
+                                                                        }
             ;
 inicio      : decvar inicio                                             {
                                                                             //printf("2 ");
                                                                             $$ = allocTreeNode(LSTMT,2,$1,$2);
                                                                         }
-            | decfunc inicio                                            { 
+            | decfunc inicio                                            {
                                                                            // printf("3 ");
                                                                             $$ = allocTreeNode(LSTMT, 2, $1, $2);
                                                                         }
             |                                                           {$$ = NULL;}
             ;
-decvar      : LET IDENTIFIER loopatrib ENDEXPRESSION                    { 
+decvar      : LET IDENTIFIER loopatrib ENDEXPRESSION                    {
                                                                          // printf("4 ");
-                                                                          $$ = allocTreeNode(LTIPAGEM, 2, allocID($2), $3); 
+                                                                          $$ = allocTreeNode(LTIPAGEM, 2, allocID($2), $3);
                                                                         }
             ;
 loopatrib   : ASSIGN exp                                                {
-                                                                            $$ = allocTreeNode(LENDEXPRESSION, 1, $2); 
+                                                                            $$ = allocTreeNode(LENDEXPRESSION, 1, $2);
                                                                         }
             |                                                           {$$ = NULL;}
             ;
-decfunc     : DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco           { 
+decfunc     : DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco            {
+                                                                          yyerror("print");
+                                                                        }
+            | DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco           {
                                                                         //printf("6-DEFFUNC ");
                                                                         $$ = allocTreeNode(LDEF, 3, allocID($2), $4, $6);
                                                                         }
             ;
 paramlist   :
-             IDENTIFIER looparams                                       { 
+             IDENTIFIER looparams                                       {
                                                                         //printf("8 ");
                                                                         $$ = allocTreeNode(LPARAM, 2, allocID($1),$2);
                                                                         }
@@ -512,7 +516,7 @@ looparams   : SEPARADOR IDENTIFIER looparams                            {
                                                                         //printf("9 ");
                                                                         $$ = allocTreeNode(LCOMPPARAM, 2, allocID($2),$3);
                                                                         }
-            |                                                           {$$ = NULL ;}    
+            |                                                           {$$ = NULL ;}
             ;
 bloco       :OPENBLOCK loopdecvar loopstmts CLOSEBLOCK                  {
                                                                         //printf("10 ");
@@ -524,7 +528,7 @@ loopdecvar  : decvar loopdecvar                                         {//print
                                                                         }
             |                                                           {$$ = NULL ;}
             ;
-loopstmts   : stmt loopstmts                                            {//printf("12 "); 
+loopstmts   : stmt loopstmts                                            {//printf("12 ");
                                                                         $$ = allocTreeNode(LVOLTASTMT, 2, $1, $2);
                                                                         }
             |                                                           {$$ = NULL ;}
@@ -532,7 +536,7 @@ loopstmts   : stmt loopstmts                                            {//print
 stmt        : declaracao ENDEXPRESSION                                  {
                                                                         //printf("220 ");
                                                                         $$ = allocTreeNode(LSTMTFUNCCALL, 1, $1);
-                                                                        }     
+                                                                        }
             | IF OPENPAR exp CLOSEPAR bloco                             {
                                                                         //printf("15 ");
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5);
@@ -541,10 +545,10 @@ stmt        : declaracao ENDEXPRESSION                                  {
                                                                         //printf("15 ");
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5, $6);
                                                                         }
-             
+
             | WHILE OPENPAR exp CLOSEPAR bloco                          {
                                                                         //printf("16 ");
-                                                                        $$ = allocTreeNode(LWHILE, 2, $3, $5); 
+                                                                        $$ = allocTreeNode(LWHILE, 2, $3, $5);
                                                                         }
             | RETURN loopexp ENDEXPRESSION                              {
                                                                         //printf("17 ");
@@ -555,9 +559,9 @@ stmt        : declaracao ENDEXPRESSION                                  {
                                                                         }
             | CONTINUE ENDEXPRESSION                                    {
                                                                         //printf("20 ");
-                                                                        $$ = allocTreeNode(LLABELCONTINUE,2,$1, $2); 
-                                                                        }   
-            ; 
+                                                                        $$ = allocTreeNode(LLABELCONTINUE,2,$1, $2);
+                                                                        }
+            ;
 declaracao: assign                                                      {
                                                                         //printf("ASSIGN ");
                                                                         $$ = allocTreeNode(LASSIGNSTMT, 1, $1);
@@ -574,7 +578,7 @@ assign      : IDENTIFIER ASSIGN exp                                     {
                                                                         //$$ = allocTreeNode(LASSIGNSTMT, 1, $1);
                                                                         $$ = allocTreeNode(LCOMPASSIGN, 2, allocID($1), $3);
                                                                         }
-            ; 
+            ;
 funccall    : IDENTIFIER OPENPAR arglist CLOSEPAR                       {
                                                                         //printf("24 ");
                                                                         $$ = allocTreeNode(LFUNCCALL, 2, allocID($1), $3);
@@ -582,7 +586,7 @@ funccall    : IDENTIFIER OPENPAR arglist CLOSEPAR                       {
             | IDENTIFIER OPENPAR CLOSEPAR                               {
                                                                         $$ = allocTreeNode(LFUNCCALL, 2, allocID($1));
                                                                         }
-            ;   
+            ;
 arglist     : exp loopargs                                              {
                                                                         //printf("26 ");
                                                                         $$ = allocTreeNode(LLABELFUNCCALL, 1, $1);
@@ -600,7 +604,7 @@ exp         : exp PLUS exp                                              {
                                                                         }
             | exp MINUS exp                                             {
                                                                         //printf("29 ");
-                                                                        $$ = allocTreeNode(LMINUS, 2, $1, $3); 
+                                                                        $$ = allocTreeNode(LMINUS, 2, $1, $3);
                                                                         }
             | exp MULT exp                                              {
                                                                         //printf("30 ");
@@ -616,7 +620,7 @@ exp         : exp PLUS exp                                              {
                                                                         }
             | exp LESSEQUAL exp                                         {
                                                                         //printf("33 ");
-                                                                        $$ = allocTreeNode(LLESSEQUAL, 2, $1, $3); 
+                                                                        $$ = allocTreeNode(LLESSEQUAL, 2, $1, $3);
                                                                         }
             | exp GREAT exp                                             {
                                                                         //printf("34 ");
@@ -652,7 +656,7 @@ exp         : exp PLUS exp                                              {
                                                                         }
             | OPENPAR exp CLOSEPAR                                      {
                                                                         //printf("42 ");
-                                                                        $$ = allocTreeNode(LOPENPAR, 1, $2); 
+                                                                        $$ = allocTreeNode(LOPENPAR, 1, $2);
                                                                         }
             | funccall                                                  {
                                                                         //printf("43 ");
@@ -678,19 +682,19 @@ int yyerror(const char *s) {
 int main(int argc, char** argv) {
 
     FILE *input  = fopen(argv[1], "r");
-    FILE *output = fopen(argv[2], "w");  
-    
+    FILE *output = fopen(argv[2], "w");
+
     yyin = input;
     yyout = output;
-    
+
     fprintf(yyout,"[program");
 
     yyparse();
-    fprintf(yyout,"]");
-    
+    fprintf(yyout,"]\n");
+
     fclose(input);
     fclose(output);
-    
+
     //If errors, clear file
     if(ERRORS != 0){
         FILE *output = fopen(argv[2], "w");
