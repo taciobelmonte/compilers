@@ -6,54 +6,54 @@ Grammar
 
     2 inicio: decvar inicio
     3       | decfunc inicio
-    4       | /* empty */
+    4       | %empty
 
     5 decvar: LET IDENTIFIER loopatrib ENDEXPRESSION
 
     6 loopatrib: ASSIGN exp
-    7          | /* empty */
+    7          | %empty
 
     8 decfunc: DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco
     9        | DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco
 
    10 paramlist: IDENTIFIER looparams
-   11          | /* empty */
+   11          | %empty
 
    12 looparams: SEPARADOR IDENTIFIER looparams
-   13          | /* empty */
+   13          | %empty
 
    14 bloco: OPENBLOCK loopdecvar loopstmts CLOSEBLOCK
 
    15 loopdecvar: decvar loopdecvar
-   16           | /* empty */
+   16           | %empty
 
    17 loopstmts: stmt loopstmts
-   18          | /* empty */
+   18          | %empty
 
    19 stmt: funccall ENDEXPRESSION
    20     | assign ENDEXPRESSION
    21     | IF OPENPAR exp CLOSEPAR bloco
-   22     | IF OPENPAR exp CLOSEPAR ELSE bloco
+   22     | IF OPENPAR exp CLOSEPAR bloco ELSE bloco
    23     | WHILE OPENPAR exp CLOSEPAR bloco
    24     | RETURN loopexp ENDEXPRESSION
    25     | BREAK ENDEXPRESSION
    26     | CONTINUE ENDEXPRESSION
 
    27 loopexp: exp
-   28        | /* empty */
+   28        | %empty
 
    29 assign: IDENTIFIER ASSIGN exp
 
    30 funccall: IDENTIFIER OPENPAR arglist CLOSEPAR
    31         | PRINTAOLA OPENPAR arglist CLOSEPAR
 
-   32 arglist: /* empty */
+   32 arglist: %empty
    33        | loopargs
 
    34 loopargs: exp loopargs2
 
    35 loopargs2: SEPARADOR exp loopargs2
-   36          | /* empty */
+   36          | %empty
 
    37 exp: exp PLUS exp
    38    | exp MINUS exp
@@ -157,7 +157,7 @@ exp (53)
     47 48 49 50 51
 
 
-state 0
+State 0
 
     0 $accept: . programa $end
 
@@ -172,7 +172,7 @@ state 0
     decfunc   go to state 6
 
 
-state 1
+State 1
 
     8 decfunc: DEF . PRINTAOLA OPENPAR paramlist CLOSEPAR bloco
     9        | DEF . IDENTIFIER OPENPAR paramlist CLOSEPAR bloco
@@ -181,28 +181,28 @@ state 1
     PRINTAOLA   shift, and go to state 8
 
 
-state 2
+State 2
 
     5 decvar: LET . IDENTIFIER loopatrib ENDEXPRESSION
 
     IDENTIFIER  shift, and go to state 9
 
 
-state 3
+State 3
 
     0 $accept: programa . $end
 
     $end  shift, and go to state 10
 
 
-state 4
+State 4
 
     1 programa: inicio .
 
     $default  reduce using rule 1 (programa)
 
 
-state 5
+State 5
 
     2 inicio: decvar . inicio
 
@@ -216,7 +216,7 @@ state 5
     decfunc  go to state 6
 
 
-state 6
+State 6
 
     3 inicio: decfunc . inicio
 
@@ -230,21 +230,21 @@ state 6
     decfunc  go to state 6
 
 
-state 7
+State 7
 
     9 decfunc: DEF IDENTIFIER . OPENPAR paramlist CLOSEPAR bloco
 
     OPENPAR  shift, and go to state 13
 
 
-state 8
+State 8
 
     8 decfunc: DEF PRINTAOLA . OPENPAR paramlist CLOSEPAR bloco
 
     OPENPAR  shift, and go to state 14
 
 
-state 9
+State 9
 
     5 decvar: LET IDENTIFIER . loopatrib ENDEXPRESSION
 
@@ -255,28 +255,28 @@ state 9
     loopatrib  go to state 16
 
 
-state 10
+State 10
 
     0 $accept: programa $end .
 
     $default  accept
 
 
-state 11
+State 11
 
     2 inicio: decvar inicio .
 
     $default  reduce using rule 2 (inicio)
 
 
-state 12
+State 12
 
     3 inicio: decfunc inicio .
 
     $default  reduce using rule 3 (inicio)
 
 
-state 13
+State 13
 
     9 decfunc: DEF IDENTIFIER OPENPAR . paramlist CLOSEPAR bloco
 
@@ -287,7 +287,7 @@ state 13
     paramlist  go to state 18
 
 
-state 14
+State 14
 
     8 decfunc: DEF PRINTAOLA OPENPAR . paramlist CLOSEPAR bloco
 
@@ -298,7 +298,7 @@ state 14
     paramlist  go to state 19
 
 
-state 15
+State 15
 
     6 loopatrib: ASSIGN . exp
 
@@ -313,14 +313,14 @@ state 15
     exp       go to state 27
 
 
-state 16
+State 16
 
     5 decvar: LET IDENTIFIER loopatrib . ENDEXPRESSION
 
     ENDEXPRESSION  shift, and go to state 28
 
 
-state 17
+State 17
 
    10 paramlist: IDENTIFIER . looparams
 
@@ -331,28 +331,28 @@ state 17
     looparams  go to state 30
 
 
-state 18
+State 18
 
     9 decfunc: DEF IDENTIFIER OPENPAR paramlist . CLOSEPAR bloco
 
     CLOSEPAR  shift, and go to state 31
 
 
-state 19
+State 19
 
     8 decfunc: DEF PRINTAOLA OPENPAR paramlist . CLOSEPAR bloco
 
     CLOSEPAR  shift, and go to state 32
 
 
-state 20
+State 20
 
    53 exp: DEC .
 
     $default  reduce using rule 53 (exp)
 
 
-state 21
+State 21
 
    51 exp: OPENPAR . exp CLOSEPAR
 
@@ -367,7 +367,7 @@ state 21
     exp       go to state 33
 
 
-state 22
+State 22
 
    30 funccall: IDENTIFIER . OPENPAR arglist CLOSEPAR
    54 exp: IDENTIFIER .
@@ -377,14 +377,14 @@ state 22
     $default  reduce using rule 54 (exp)
 
 
-state 23
+State 23
 
    31 funccall: PRINTAOLA . OPENPAR arglist CLOSEPAR
 
     OPENPAR  shift, and go to state 35
 
 
-state 24
+State 24
 
    49 exp: MINUS . exp
 
@@ -399,7 +399,7 @@ state 24
     exp       go to state 36
 
 
-state 25
+State 25
 
    50 exp: NOT . exp
 
@@ -414,14 +414,14 @@ state 25
     exp       go to state 37
 
 
-state 26
+State 26
 
    52 exp: funccall .
 
     $default  reduce using rule 52 (exp)
 
 
-state 27
+State 27
 
     6 loopatrib: ASSIGN exp .
    37 exp: exp . PLUS exp
@@ -453,28 +453,28 @@ state 27
     $default  reduce using rule 6 (loopatrib)
 
 
-state 28
+State 28
 
     5 decvar: LET IDENTIFIER loopatrib ENDEXPRESSION .
 
     $default  reduce using rule 5 (decvar)
 
 
-state 29
+State 29
 
    12 looparams: SEPARADOR . IDENTIFIER looparams
 
     IDENTIFIER  shift, and go to state 50
 
 
-state 30
+State 30
 
    10 paramlist: IDENTIFIER looparams .
 
     $default  reduce using rule 10 (paramlist)
 
 
-state 31
+State 31
 
     9 decfunc: DEF IDENTIFIER OPENPAR paramlist CLOSEPAR . bloco
 
@@ -483,7 +483,7 @@ state 31
     bloco  go to state 52
 
 
-state 32
+State 32
 
     8 decfunc: DEF PRINTAOLA OPENPAR paramlist CLOSEPAR . bloco
 
@@ -492,7 +492,7 @@ state 32
     bloco  go to state 53
 
 
-state 33
+State 33
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -523,7 +523,7 @@ state 33
     DIV         shift, and go to state 49
 
 
-state 34
+State 34
 
    30 funccall: IDENTIFIER OPENPAR . arglist CLOSEPAR
 
@@ -542,7 +542,7 @@ state 34
     exp       go to state 57
 
 
-state 35
+State 35
 
    31 funccall: PRINTAOLA OPENPAR . arglist CLOSEPAR
 
@@ -561,7 +561,7 @@ state 35
     exp       go to state 57
 
 
-state 36
+State 36
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -580,7 +580,7 @@ state 36
     $default  reduce using rule 49 (exp)
 
 
-state 37
+State 37
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -599,7 +599,7 @@ state 37
     $default  reduce using rule 50 (exp)
 
 
-state 38
+State 38
 
    48 exp: exp OR . exp
 
@@ -614,7 +614,7 @@ state 38
     exp       go to state 59
 
 
-state 39
+State 39
 
    47 exp: exp AND . exp
 
@@ -629,7 +629,7 @@ state 39
     exp       go to state 60
 
 
-state 40
+State 40
 
    45 exp: exp EQUAL . exp
 
@@ -644,7 +644,7 @@ state 40
     exp       go to state 61
 
 
-state 41
+State 41
 
    46 exp: exp DIFF . exp
 
@@ -659,7 +659,7 @@ state 41
     exp       go to state 62
 
 
-state 42
+State 42
 
    41 exp: exp LESS . exp
 
@@ -674,7 +674,7 @@ state 42
     exp       go to state 63
 
 
-state 43
+State 43
 
    42 exp: exp LESSEQUAL . exp
 
@@ -689,7 +689,7 @@ state 43
     exp       go to state 64
 
 
-state 44
+State 44
 
    44 exp: exp GREATEQUAL . exp
 
@@ -704,7 +704,7 @@ state 44
     exp       go to state 65
 
 
-state 45
+State 45
 
    43 exp: exp GREAT . exp
 
@@ -719,7 +719,7 @@ state 45
     exp       go to state 66
 
 
-state 46
+State 46
 
    37 exp: exp PLUS . exp
 
@@ -734,7 +734,7 @@ state 46
     exp       go to state 67
 
 
-state 47
+State 47
 
    38 exp: exp MINUS . exp
 
@@ -749,7 +749,7 @@ state 47
     exp       go to state 68
 
 
-state 48
+State 48
 
    39 exp: exp MULT . exp
 
@@ -764,7 +764,7 @@ state 48
     exp       go to state 69
 
 
-state 49
+State 49
 
    40 exp: exp DIV . exp
 
@@ -779,7 +779,7 @@ state 49
     exp       go to state 70
 
 
-state 50
+State 50
 
    12 looparams: SEPARADOR IDENTIFIER . looparams
 
@@ -790,7 +790,7 @@ state 50
     looparams  go to state 71
 
 
-state 51
+State 51
 
    14 bloco: OPENBLOCK . loopdecvar loopstmts CLOSEBLOCK
 
@@ -802,42 +802,42 @@ state 51
     loopdecvar  go to state 73
 
 
-state 52
+State 52
 
     9 decfunc: DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco .
 
     $default  reduce using rule 9 (decfunc)
 
 
-state 53
+State 53
 
     8 decfunc: DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco .
 
     $default  reduce using rule 8 (decfunc)
 
 
-state 54
+State 54
 
    51 exp: OPENPAR exp CLOSEPAR .
 
     $default  reduce using rule 51 (exp)
 
 
-state 55
+State 55
 
    30 funccall: IDENTIFIER OPENPAR arglist . CLOSEPAR
 
     CLOSEPAR  shift, and go to state 74
 
 
-state 56
+State 56
 
    33 arglist: loopargs .
 
     $default  reduce using rule 33 (arglist)
 
 
-state 57
+State 57
 
    34 loopargs: exp . loopargs2
    37 exp: exp . PLUS exp
@@ -872,14 +872,14 @@ state 57
     loopargs2  go to state 76
 
 
-state 58
+State 58
 
    31 funccall: PRINTAOLA OPENPAR arglist . CLOSEPAR
 
     CLOSEPAR  shift, and go to state 77
 
 
-state 59
+State 59
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -910,7 +910,7 @@ state 59
     $default  reduce using rule 48 (exp)
 
 
-state 60
+State 60
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -940,7 +940,7 @@ state 60
     $default  reduce using rule 47 (exp)
 
 
-state 61
+State 61
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -968,7 +968,7 @@ state 61
     $default  reduce using rule 45 (exp)
 
 
-state 62
+State 62
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -996,7 +996,7 @@ state 62
     $default  reduce using rule 46 (exp)
 
 
-state 63
+State 63
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -1020,7 +1020,7 @@ state 63
     $default  reduce using rule 41 (exp)
 
 
-state 64
+State 64
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -1044,7 +1044,7 @@ state 64
     $default  reduce using rule 42 (exp)
 
 
-state 65
+State 65
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -1068,7 +1068,7 @@ state 65
     $default  reduce using rule 44 (exp)
 
 
-state 66
+State 66
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -1092,7 +1092,7 @@ state 66
     $default  reduce using rule 43 (exp)
 
 
-state 67
+State 67
 
    37 exp: exp . PLUS exp
    37    | exp PLUS exp .
@@ -1114,7 +1114,7 @@ state 67
     $default  reduce using rule 37 (exp)
 
 
-state 68
+State 68
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -1136,7 +1136,7 @@ state 68
     $default  reduce using rule 38 (exp)
 
 
-state 69
+State 69
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -1155,7 +1155,7 @@ state 69
     $default  reduce using rule 39 (exp)
 
 
-state 70
+State 70
 
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
@@ -1174,14 +1174,14 @@ state 70
     $default  reduce using rule 40 (exp)
 
 
-state 71
+State 71
 
    12 looparams: SEPARADOR IDENTIFIER looparams .
 
     $default  reduce using rule 12 (looparams)
 
 
-state 72
+State 72
 
    15 loopdecvar: decvar . loopdecvar
 
@@ -1193,7 +1193,7 @@ state 72
     loopdecvar  go to state 78
 
 
-state 73
+State 73
 
    14 bloco: OPENBLOCK loopdecvar . loopstmts CLOSEBLOCK
 
@@ -1213,14 +1213,14 @@ state 73
     funccall   go to state 88
 
 
-state 74
+State 74
 
    30 funccall: IDENTIFIER OPENPAR arglist CLOSEPAR .
 
     $default  reduce using rule 30 (funccall)
 
 
-state 75
+State 75
 
    35 loopargs2: SEPARADOR . exp loopargs2
 
@@ -1235,28 +1235,28 @@ state 75
     exp       go to state 89
 
 
-state 76
+State 76
 
    34 loopargs: exp loopargs2 .
 
     $default  reduce using rule 34 (loopargs)
 
 
-state 77
+State 77
 
    31 funccall: PRINTAOLA OPENPAR arglist CLOSEPAR .
 
     $default  reduce using rule 31 (funccall)
 
 
-state 78
+State 78
 
    15 loopdecvar: decvar loopdecvar .
 
     $default  reduce using rule 15 (loopdecvar)
 
 
-state 79
+State 79
 
    24 stmt: RETURN . loopexp ENDEXPRESSION
 
@@ -1274,36 +1274,36 @@ state 79
     exp       go to state 91
 
 
-state 80
+State 80
 
    21 stmt: IF . OPENPAR exp CLOSEPAR bloco
-   22     | IF . OPENPAR exp CLOSEPAR ELSE bloco
+   22     | IF . OPENPAR exp CLOSEPAR bloco ELSE bloco
 
     OPENPAR  shift, and go to state 92
 
 
-state 81
+State 81
 
    23 stmt: WHILE . OPENPAR exp CLOSEPAR bloco
 
     OPENPAR  shift, and go to state 93
 
 
-state 82
+State 82
 
    26 stmt: CONTINUE . ENDEXPRESSION
 
     ENDEXPRESSION  shift, and go to state 94
 
 
-state 83
+State 83
 
    25 stmt: BREAK . ENDEXPRESSION
 
     ENDEXPRESSION  shift, and go to state 95
 
 
-state 84
+State 84
 
    29 assign: IDENTIFIER . ASSIGN exp
    30 funccall: IDENTIFIER . OPENPAR arglist CLOSEPAR
@@ -1312,14 +1312,14 @@ state 84
     OPENPAR  shift, and go to state 34
 
 
-state 85
+State 85
 
    14 bloco: OPENBLOCK loopdecvar loopstmts . CLOSEBLOCK
 
     CLOSEBLOCK  shift, and go to state 97
 
 
-state 86
+State 86
 
    17 loopstmts: stmt . loopstmts
 
@@ -1339,21 +1339,21 @@ state 86
     funccall   go to state 88
 
 
-state 87
+State 87
 
    20 stmt: assign . ENDEXPRESSION
 
     ENDEXPRESSION  shift, and go to state 99
 
 
-state 88
+State 88
 
    19 stmt: funccall . ENDEXPRESSION
 
     ENDEXPRESSION  shift, and go to state 100
 
 
-state 89
+State 89
 
    35 loopargs2: SEPARADOR exp . loopargs2
    37 exp: exp . PLUS exp
@@ -1388,14 +1388,14 @@ state 89
     loopargs2  go to state 101
 
 
-state 90
+State 90
 
    24 stmt: RETURN loopexp . ENDEXPRESSION
 
     ENDEXPRESSION  shift, and go to state 102
 
 
-state 91
+State 91
 
    27 loopexp: exp .
    37 exp: exp . PLUS exp
@@ -1427,10 +1427,10 @@ state 91
     $default  reduce using rule 27 (loopexp)
 
 
-state 92
+State 92
 
    21 stmt: IF OPENPAR . exp CLOSEPAR bloco
-   22     | IF OPENPAR . exp CLOSEPAR ELSE bloco
+   22     | IF OPENPAR . exp CLOSEPAR bloco ELSE bloco
 
     DEC         shift, and go to state 20
     OPENPAR     shift, and go to state 21
@@ -1443,7 +1443,7 @@ state 92
     exp       go to state 103
 
 
-state 93
+State 93
 
    23 stmt: WHILE OPENPAR . exp CLOSEPAR bloco
 
@@ -1458,21 +1458,21 @@ state 93
     exp       go to state 104
 
 
-state 94
+State 94
 
    26 stmt: CONTINUE ENDEXPRESSION .
 
     $default  reduce using rule 26 (stmt)
 
 
-state 95
+State 95
 
    25 stmt: BREAK ENDEXPRESSION .
 
     $default  reduce using rule 25 (stmt)
 
 
-state 96
+State 96
 
    29 assign: IDENTIFIER ASSIGN . exp
 
@@ -1487,52 +1487,52 @@ state 96
     exp       go to state 105
 
 
-state 97
+State 97
 
    14 bloco: OPENBLOCK loopdecvar loopstmts CLOSEBLOCK .
 
     $default  reduce using rule 14 (bloco)
 
 
-state 98
+State 98
 
    17 loopstmts: stmt loopstmts .
 
     $default  reduce using rule 17 (loopstmts)
 
 
-state 99
+State 99
 
    20 stmt: assign ENDEXPRESSION .
 
     $default  reduce using rule 20 (stmt)
 
 
-state 100
+State 100
 
    19 stmt: funccall ENDEXPRESSION .
 
     $default  reduce using rule 19 (stmt)
 
 
-state 101
+State 101
 
    35 loopargs2: SEPARADOR exp loopargs2 .
 
     $default  reduce using rule 35 (loopargs2)
 
 
-state 102
+State 102
 
    24 stmt: RETURN loopexp ENDEXPRESSION .
 
     $default  reduce using rule 24 (stmt)
 
 
-state 103
+State 103
 
    21 stmt: IF OPENPAR exp . CLOSEPAR bloco
-   22     | IF OPENPAR exp . CLOSEPAR ELSE bloco
+   22     | IF OPENPAR exp . CLOSEPAR bloco ELSE bloco
    37 exp: exp . PLUS exp
    38    | exp . MINUS exp
    39    | exp . MULT exp
@@ -1561,7 +1561,7 @@ state 103
     DIV         shift, and go to state 49
 
 
-state 104
+State 104
 
    23 stmt: WHILE OPENPAR exp . CLOSEPAR bloco
    37 exp: exp . PLUS exp
@@ -1592,7 +1592,7 @@ state 104
     DIV         shift, and go to state 49
 
 
-state 105
+State 105
 
    29 assign: IDENTIFIER ASSIGN exp .
    37 exp: exp . PLUS exp
@@ -1624,51 +1624,53 @@ state 105
     $default  reduce using rule 29 (assign)
 
 
-state 106
+State 106
 
    21 stmt: IF OPENPAR exp CLOSEPAR . bloco
-   22     | IF OPENPAR exp CLOSEPAR . ELSE bloco
+   22     | IF OPENPAR exp CLOSEPAR . bloco ELSE bloco
 
-    ELSE       shift, and go to state 108
     OPENBLOCK  shift, and go to state 51
 
-    bloco  go to state 109
+    bloco  go to state 108
 
 
-state 107
+State 107
 
    23 stmt: WHILE OPENPAR exp CLOSEPAR . bloco
 
     OPENBLOCK  shift, and go to state 51
 
-    bloco  go to state 110
+    bloco  go to state 109
 
 
-state 108
-
-   22 stmt: IF OPENPAR exp CLOSEPAR ELSE . bloco
-
-    OPENBLOCK  shift, and go to state 51
-
-    bloco  go to state 111
-
-
-state 109
+State 108
 
    21 stmt: IF OPENPAR exp CLOSEPAR bloco .
+   22     | IF OPENPAR exp CLOSEPAR bloco . ELSE bloco
+
+    ELSE  shift, and go to state 110
 
     $default  reduce using rule 21 (stmt)
 
 
-state 110
+State 109
 
    23 stmt: WHILE OPENPAR exp CLOSEPAR bloco .
 
     $default  reduce using rule 23 (stmt)
 
 
-state 111
+State 110
 
-   22 stmt: IF OPENPAR exp CLOSEPAR ELSE bloco .
+   22 stmt: IF OPENPAR exp CLOSEPAR bloco ELSE . bloco
+
+    OPENBLOCK  shift, and go to state 51
+
+    bloco  go to state 111
+
+
+State 111
+
+   22 stmt: IF OPENPAR exp CLOSEPAR bloco ELSE bloco .
 
     $default  reduce using rule 22 (stmt)

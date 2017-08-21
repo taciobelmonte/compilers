@@ -16,6 +16,7 @@ FILE *yyin;
 FILE *yyout;
 int COUNTER = 0;
 int ERRORS  = 0;
+int MAIN    = 0;
 
 typedef enum typesList {
     INT,
@@ -269,7 +270,7 @@ void createASTreeType(ASTNode *tree){
             createNAryASTree(tree->tree.kids[0]); 
             createNAryASTree(tree->tree.kids[1]);
             createNAryASTree(tree->tree.kids[2]);
-            fprintf(yyout, "] "); 
+            fprintf(yyout, "]"); 
             break;
         case LIF:
             caseExpression(tree, "", 0, 0);
@@ -521,6 +522,11 @@ decfunc     : DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco            {
             | DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco           {
                                                                        // printf("6-(decfunc (%s)) \n", $2);
                                                                         $$ = allocTreeNode(LDEF,3, allocID($2), $4, $6);
+                                                                        
+                                                                        if(strcmp("main", $2) == 0){
+                                                                            MAIN++;
+                                                                        }
+                                                                        
                                                                         COUNTER++;
                                                                         }
             ;
@@ -576,6 +582,11 @@ stmt        : funccall ENDEXPRESSION                                    {
             | IF OPENPAR exp CLOSEPAR bloco                             {
                                                                         //printf("15- if(exp){} \n");
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5);
+                                                                        COUNTER++;
+                                                                        }
+            | IF OPENPAR exp CLOSEPAR bloco ELSE bloco                  {
+                                                                        //printf("15- if(exp)else{} \n");
+                                                                        $$ = allocTreeNode(LSTMTIF, 3, $3, $5, $7);
                                                                         COUNTER++;
                                                                         }
             | IF OPENPAR exp CLOSEPAR ELSE bloco                        {
@@ -760,7 +771,7 @@ int main(int argc, char** argv) {
     fclose(output);
 
     //If errors, clear file
-    if(ERRORS != 0 || COUNTER==1){
+    if(ERRORS != 0 || COUNTER==1 || (MAIN==0 || MAIN>1)){
         FILE *output = fopen(argv[2], "w");
         fclose(output);
     }
