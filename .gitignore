@@ -4,5 +4,6 @@ compilador
 *.o
 sandbox/out*
 sintatico.h
+sintatico.output
 *.y.*
 *.lex.c
