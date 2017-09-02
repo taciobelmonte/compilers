@@ -10,6 +10,8 @@ all:
 	mv lex.yy.c sintatico.lex.c
 	gcc -g -c sintatico.lex.c -o sintatico.lex.o
 	gcc -g -c sintatico.y.c -o sintatico.y.o
+	#gcc -g -c codegen.c -o codegen.o
+	#gcc -g -o compilador sintatico.lex.o sintatico.y.o codegen.o
 	gcc -g -o compilador sintatico.lex.o sintatico.y.o
 
 compilador: lex.yy.c

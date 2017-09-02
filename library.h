@@ -1,4 +1,3 @@
-
 /*################ AST DEFINITIONS #####################*/
 #define BUFFERMAX 2000
 #define MAXCHAR 500
@@ -10,7 +9,7 @@ typedef enum keyList{
     COMPPARAM,
     PARAM ,
     BLOCK,
-    DECVAR,        
+    DECVAR,
     ASSIGNSTMT,
     COMPASSIGN,
     EXP,
@@ -19,14 +18,14 @@ typedef enum keyList{
     LABELCONTINUE,
     STMTSTMT,
     LABELFUNCCALL,
-    VOLTASTMT, 
+    VOLTASTMT,
     STMTIF,
     STMTELSE,
     STMTFUNCCALL,
     FUNCCALL,
     FUNCNARGLIST,
     FUNCNNARGLIST,
-    FUNCARGLIST 
+    FUNCARGLIST
 }keys;
 
 
@@ -47,16 +46,16 @@ typedef struct{
 
 typedef struct {
     int token;
-    int totalkids;                                      
-    struct ASTNo **kids;	
+    int totalkids;
+    struct ASTNo **kids;
 }ASTree;
 
 typedef struct ASTNo{
     type tipo;
     union {
-        nodeINT integer;   
+        nodeINT integer;
         nodeID id;
-        ASTree tree;        
+        ASTree tree;
     };
 }ASTNode;
 /*################## AST STRUCTURE #################*/
