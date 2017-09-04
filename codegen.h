@@ -67,6 +67,9 @@ const char top_t1[] =
 const char pop[] =
 "\taddiu $sp, $sp, 4\n";
 
+const char load_int[] =
+"\tli $a0, %d\n";
+
 //onde %d deve ser passado como argumento, em função de quantos paramentro vieram na definicao
 //"\taddiu $sp, $sp, 8+4*%d\n";
 const char pop_paramlis[] =

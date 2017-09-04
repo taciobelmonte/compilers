@@ -188,7 +188,8 @@ void createNAryASTree(ASTNode *tree)
         }else if(tree->tipo == ID){
             fprintf(yyout," [%s]", tree->id.name);
         }else if(tree->tipo == INT){
-            fprintf(yyout," [%d]", tree->integer.integer);
+            //fprintf(yyout," [%d]", tree->integer.integer);
+            fprintf(yyout, load_int, tree->integer.integer);
         }
     }
 }
@@ -215,6 +216,8 @@ void caseExpression(ASTNode *tree, char* item, int type, int label){
     //    fprintf(yyout, "]");
 }
 
+void nodeExpression(ASTNode *tree, char* item, int type){
+}
 
 void createASTreeType(ASTNode *tree){
     switch(tree->tree.token) {
