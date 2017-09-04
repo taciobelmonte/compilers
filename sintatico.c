@@ -200,10 +200,10 @@ void createNAryASTree(ASTNode *tree)
  */
 void caseExpression(ASTNode *tree, char* item, int type, int label){
 
-    if(label){
-        fprintf(yyout, " [");
-        fprintf(yyout, "%s", item);
-    }
+    //if(label){
+    //    fprintf(yyout, " [");
+    //    fprintf(yyout, "%s", item);
+    //}
     //Create tree for first node
     createNAryASTree(tree->tree.kids[0]);
 
@@ -211,8 +211,8 @@ void caseExpression(ASTNode *tree, char* item, int type, int label){
     if(!type)
         createNAryASTree(tree->tree.kids[1]);
 
-    if(label)
-        fprintf(yyout, "]");
+    //if(label)
+    //    fprintf(yyout, "]");
 }
 
 
