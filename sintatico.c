@@ -219,6 +219,7 @@ void caseExpression(ASTNode *tree, char* item, int type, int label){
 void createASTreeType(ASTNode *tree){
     switch(tree->tree.token) {
         case LPLUS:
+            //TODO revisar codegen_exp
             caseExpression(tree, "+",0, 1);
         break;
         case LMINUS:
@@ -320,12 +321,15 @@ void createASTreeType(ASTNode *tree){
             }
             break;
         case LDEF:
-                fprintf(yyout, " [decfunc [%s]",tree->tree.kids[0]->id.name);
+                //fprintf(yyout, " [decfunc [%s]",tree->tree.kids[0]->id.name);
+                fprintf(yyout, codegen_decfunc, def_funcion_prefix, tree->tree.kids[0]->id.name);
+                //TODO proper codegen for paramlist of a function
                 createNAryASTree(tree->tree.kids[1]);
-                if(tree->tree.kids[1] == NULL)
-                    fprintf(yyout, " [paramlist]");
+                //if(tree->tree.kids[1] == NULL)
+                //    fprintf(yyout, " [paramlist]");
                 createNAryASTree(tree->tree.kids[2]);
-                fprintf(yyout, "]");
+                //fprintf(yyout, "]");
+                fprintf(yyout, codegen_decfunc_sufix);
                 break;
         case LPARAM:
                 fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
@@ -337,12 +341,14 @@ void createASTreeType(ASTNode *tree){
                 createNAryASTree(tree->tree.kids[1]);
                 break;
         case LBLOCK:
-                fprintf(yyout, " [block");
+                //fprintf(yyout, " [block");
+                //TODO codegen_decvar
                 if(tree->tree.kids[0] != NULL)
                     createNAryASTree(tree->tree.kids[0]);
+                //TODO codegen_stmts
                 if(tree->tree.kids[1] != NULL)
                         createNAryASTree(tree->tree.kids[1]);
-                fprintf(yyout, "]");
+                //fprintf(yyout, "]");
                 break;
          case LASSIGNSTMT:
                 fprintf(yyout, " [assign ");
@@ -370,9 +376,12 @@ void createASTreeType(ASTNode *tree){
 
 
          case LSTATEMENTFUNCCALL:
-                fprintf(yyout," [funccall ");
+                //fprintf(yyout," [funccall ");
+                fprintf(yyout, codegen_funccall);
                 createNAryASTree(tree->tree.kids[0]);
-                fprintf(yyout,"]");
+                //fprintf(yyout,"]");
+                //TODO tentar melhorar a chamada/definicao usada aqui, está mt verboso
+                fprintf(yyout, codegen_funccall_sufix, tree->tree.kids[0]->tree.kids[0]->id.name);
                 break;
 
         case LLABELFUNCCALL:
@@ -381,11 +390,12 @@ void createASTreeType(ASTNode *tree){
 
         case LFUNCCALL:
             if(tree->tree.kids[1] != NULL) {
-                fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name);
+                //fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name);
+                //TODO deal with this arglist
                 createNAryASTree(tree->tree.kids[1]);
             }else {
-                fprintf(yyout,"[%s] ", tree->tree.kids[0]->id.name);
-                fprintf(yyout,"[arglist]");
+                //fprintf(yyout,"[%s] ", tree->tree.kids[0]->id.name);
+                //fprintf(yyout,"[arglist]");
             }
          break;
 
@@ -398,6 +408,9 @@ void createASTreeType(ASTNode *tree){
 
         case LFUNCNNARGLIST:
             createNAryASTree( tree->tree.kids[0] );
+            fprintf(yyout, push_a0); //TODO conferir com tacio se está certo
+            //quando chega no LFUNCNNARGLIST é pq tem pelomenos um argumento, aí so empilha o primeiro, se tiver mais
+            //a recussão da conta por si só
             createNAryASTree( tree->tree.kids[1] );
             break;
 

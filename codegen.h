@@ -1,3 +1,6 @@
+#ifndef CODEGEN_H
+#define CODEGEN_H
+
 /* pefixes */
 
 const char def_funcion_prefix[] = "_f_";
@@ -9,7 +12,6 @@ const char global_var_prefix[] = "__";
 const char mips_head[] =
 ".data\n\n"
 ".text\n\n";
-
 
 const char deff_print[] =
 "_f_print:\n"
@@ -25,10 +27,70 @@ const char deff_print[] =
     "\tj $ra\n\n";
 
 const char call_main[] =
-"main:\n"
+"\nmain:\n"
+    "\tsw $fp, 0($sp)\n"
+    "\taddiu $sp, $sp, -4\n"
     "\tsw $fp, 0($sp)\n"
     "\taddiu $sp, $sp, -4\n"
     "\tjal _f_main\n"
     "\tli $v0, 10\n"
     "\tsyscall\n";
 
+const char push_ra[] =
+"\tsw $ra, 0($sp)\n"
+"\taddiu $sp, $sp, -4\n";
+
+const char push_fp[] =
+"\tsw $fp, 0($sp)\n"
+"\taddiu $sp, $sp, -4\n";
+
+const char push_a0[] =
+"\tsw $a0, 0($sp)\n"
+"\taddiu $sp, $sp, -4\n";
+
+const char push_t1[] =
+"\tsw $t1, 0($sp)\n"
+"\taddiu $sp, $sp, -4\n";
+
+const char top_a0[] =
+"\tlw $a0, 4($sp)\n";
+
+const char top_fp[] =
+"\tlw $fp, 4($sp)\n";
+
+const char top_ra[] =
+"\tlw $ra, 4($sp)\n";
+
+const char top_t1[] =
+"\tlw $t1, 4($sp)\n";
+
+const char pop[] =
+"\taddiu $sp, $sp, 4\n";
+
+//onde %d deve ser passado como argumento, em função de quantos paramentro vieram na definicao
+//"\taddiu $sp, $sp, 8+4*%d\n";
+const char pop_paramlis[] =
+"\taddiu $sp, $sp, 8+%d\n";
+
+/* codegens flexiveis */
+
+const char codegen_decfunc[] =
+"%s%s:\n"
+    "\tmove $fp, $sp\n"
+    "\tsw $ra, 0($sp)\n"
+    "\taddiu $sp, $sp, -4\n";
+
+const char codegen_decfunc_sufix[] =
+    "\tlw $ra, 4($sp)\n"
+    "\taddiu $sp, $sp, 8\n"
+    "\tlw $fp 0($sp)\n"
+    "\tj $ra\n";
+
+const char codegen_funccall[] =
+    "\tsw $fp, 0($sp)\n"
+    "\taddiu $sp, $sp, -4\n";
+
+const char codegen_funccall_sufix[] =
+    "\tjal _f_%s\n";
+
+#endif
