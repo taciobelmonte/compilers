@@ -75,6 +75,52 @@ const char load_int[] =
 const char pop_paramlis[] =
 "\taddiu $sp, $sp, 8+%d\n";
 
+/* unop exp */
+
+//TODO ver se tem forma melhor que com is-less-then-imediate-unsigned
+const char cgen_not[] =
+"\tsltiu $a0, $a0, 1\n";
+
+const char cgen_unminus[] =
+"\tnegu $a0, $a0\n";
+
+/* binop exp */
+const char cgen_add[] =
+"\tadd $a0, $t1, $a0\n";
+
+const char cgen_sub[] =
+"\tsub $a0, $t1, $a0\n";
+
+const char cgen_mul[] =
+"\tmul $a0, $t1, $a0\n";
+
+const char cgen_div[] =
+"\tdiv $a0, $t1, $a0\n";
+
+const char cgen_and[] =
+"\tand $a0, $t1, $a0\n";
+
+const char cgen_or[] =
+"\tor $a0, $t1, $a0\n";
+
+const char cgen_sgt[] =
+"\tsgt $a0, $t1, $a0\n";
+
+const char cgen_slt[] =
+"\tslt $a0, $t1, $a0\n";
+
+const char cgen_seq[] =
+"\tseq $a0, $t1, $a0\n";
+
+const char cgen_sneq[] =
+"\tsne $a0, $t1, $a0\n";
+
+const char cgen_sge[] =
+"\tsge $a0, $t1, $a0\n";
+
+const char cgen_sle[] =
+"\tsle $a0, $t1, $a0\n";
+
 /* codegens flexiveis */
 
 const char codegen_decfunc[] =

@@ -217,52 +217,77 @@ void caseExpression(ASTNode *tree, char* item, int type, int label){
 }
 
 void nodeExpression(ASTNode *tree, char* item, int type){
+
+    //Create tree for first node
+    createNAryASTree(tree->tree.kids[0]);
+
+    //Create tree for second node if is binop operation
+    if(!type){
+        fprintf(yyout, push_a0);
+        createNAryASTree(tree->tree.kids[1]);
+        fprintf(yyout, top_t1);
+        fprintf(yyout, pop);
+    }
 }
 
 void createASTreeType(ASTNode *tree){
     switch(tree->tree.token) {
         case LPLUS:
             //TODO revisar codegen_exp
-            caseExpression(tree, "+",0, 1);
+            nodeExpression(tree, "+",0);
+            fprintf(yyout, cgen_add);
         break;
         case LMINUS:
-            caseExpression(tree, "-",0, 1);
+            nodeExpression(tree, "-",0);
+            fprintf(yyout, cgen_sub);
         break;
         case LMULT:
-            caseExpression(tree, "*",0, 1);
+            nodeExpression(tree, "*",0);
+            fprintf(yyout, cgen_mul);
             break;
         case LDIV:
-            caseExpression(tree, "/",0, 1);
+            nodeExpression(tree, "/",0);
+            fprintf(yyout, cgen_div);
             break;
         case LUMINUS:
-            caseExpression(tree, "-",1, 1);
+            nodeExpression(tree, "-",1);
+            fprintf(yyout, cgen_unminus);
             break;
         case LAND:
-            caseExpression(tree, "&&",0, 1);
+            nodeExpression(tree, "&&",0);
+            fprintf(yyout, cgen_and);
             break;
         case LOR:
-            caseExpression(tree, "||",0, 1);
+            nodeExpression(tree, "||",0);
+            fprintf(yyout, cgen_or);
             break;
         case LNOT:
-            caseExpression(tree, "!",1, 1);
+            nodeExpression(tree, "!",1);
+            fprintf(yyout, cgen_not);
             break;
         case LGREAT:
-            caseExpression(tree, ">",0, 1);
+            nodeExpression(tree, ">",0);
+            fprintf(yyout, cgen_sgt);
             break;
         case LGREATEQUAL:
-            caseExpression(tree, ">=",0, 1);
+            nodeExpression(tree, ">=",0);
+            fprintf(yyout, cgen_sge);
             break;
         case LLESSEQUAL:
-            caseExpression(tree, "<=",0, 1);
+            nodeExpression(tree, "<=",0);
+            fprintf(yyout, cgen_sle);
             break;
         case LLESS:
-            caseExpression(tree, "<",0, 1);
+            nodeExpression(tree, "<",0);
+            fprintf(yyout, cgen_slt);
             break;
         case LEQUAL:
-            caseExpression(tree, "==",0, 1);
+            nodeExpression(tree, "==",0);
+            fprintf(yyout, cgen_seq);
             break;
         case LDIFF:
-            caseExpression(tree, "!=",0, 1);
+            nodeExpression(tree, "!=",0);
+            fprintf(yyout, cgen_sneq);
             break;
         case LWHILE:
             caseExpression(tree, "while",0, 1);
