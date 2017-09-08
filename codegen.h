@@ -1,6 +1,8 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
+#define QUOTE(_VAR)     #_VAR
+#define TO_STRING(VAR)  QUOTE(VAR)
 /* pefixes */
 
 const char def_funcion_prefix[] = "_f_";
@@ -97,11 +99,15 @@ const char cgen_mul[] =
 const char cgen_div[] =
 "\tdiv $a0, $t1, $a0\n";
 
+//if some operand is zero, return zero
 const char cgen_and[] =
+"\tsne $a0, $a0, $0\n"
+"\tsne $t1, $t1, $0\n"
 "\tand $a0, $t1, $a0\n";
 
 const char cgen_or[] =
-"\tor $a0, $t1, $a0\n";
+"\tor $a0, $t1, $a0\n"
+"\tsne $a0, $a0, $0\n";
 
 const char cgen_sgt[] =
 "\tsgt $a0, $t1, $a0\n";
@@ -130,6 +136,7 @@ const char codegen_decfunc[] =
     "\taddiu $sp, $sp, -4\n";
 
 const char codegen_decfunc_sufix[] =
+"return_label:\n"
     "\tlw $ra, 4($sp)\n"
     "\taddiu $sp, $sp, 8\n"
     "\tlw $fp 0($sp)\n"
