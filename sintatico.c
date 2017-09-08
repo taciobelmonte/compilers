@@ -18,6 +18,8 @@ FILE *yyout;
 int COUNTER = 0;
 int ERRORS  = 0;
 int MAIN    = 0;
+int args    = 0;
+int args_total= 0;
 
 typedef enum typesList {
     INT,
@@ -89,6 +91,7 @@ typedef struct {
 
 typedef struct ASTNo{
     type tipo;
+    int args_total;
     union {
         nodeINT integer;
         nodeID id;
@@ -172,6 +175,8 @@ ASTNode *allocTreeNode(int token, int totalkids, ...) {
     newnode->tipo               = AST;
     newnode->tree.token         = token;
     newnode->tree.totalkids     = totalkids;
+    if(token == LDEF)
+        newnode->args_total = args_total;
 
     for(i =0; i < totalkids; i++)
          newnode->tree.kids[i] = va_arg(list, ASTNode*);
@@ -350,14 +355,14 @@ void createASTreeType(ASTNode *tree){
             break;
         case LDEF:
                 //fprintf(yyout, " [decfunc [%s]",tree->tree.kids[0]->id.name);
-                fprintf(yyout, codegen_decfunc, def_funcion_prefix, tree->tree.kids[0]->id.name);
+                fprintf(yyout, codegen_decfunc, tree->tree.kids[0]->id.name);
                 //TODO proper codegen for paramlist of a function
                 createNAryASTree(tree->tree.kids[1]);
                 //if(tree->tree.kids[1] == NULL)
                 //    fprintf(yyout, " [paramlist]");
                 createNAryASTree(tree->tree.kids[2]);
                 //fprintf(yyout, "]");
-                fprintf(yyout, codegen_decfunc_sufix);
+                fprintf(yyout, codegen_decfunc_sufix, tree->tree.kids[0]->id.name, 8 + tree->args_total * 4);
                 break;
         case LPARAM:
                 fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
@@ -563,6 +568,8 @@ decfunc     : DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco            {
                                                                         }
             | DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco           {
                                                                         //printf("6-(decfunc (%s)) \n", $2);
+                                                                        args_total = args;
+                                                                        args=0;
                                                                         $$ = allocTreeNode(LDEF,3, allocID($2), $4, $6);
 
                                                                         if(strcmp("main", $2) == 0){
@@ -575,6 +582,7 @@ decfunc     : DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco            {
 paramlist   :
              IDENTIFIER looparams                                       {
                                                                         //printf("8-(paramlist loop)\n");
+                                                                        args++;
                                                                         $$ = allocTreeNode(LPARAM, 2, allocID($1),$2);
                                                                         COUNTER++;
                                                                         }
@@ -585,6 +593,7 @@ paramlist   :
             ;
 looparams   : SEPARADOR IDENTIFIER looparams                            {
                                                                         //printf("9-(,ID looparams) \n");
+                                                                        args++;
                                                                         $$ = allocTreeNode(LCOMPPARAM, 2, allocID($2),$3);
                                                                         COUNTER++;
                                                                         }

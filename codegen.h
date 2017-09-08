@@ -1,8 +1,6 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
-#define QUOTE(_VAR)     #_VAR
-#define TO_STRING(VAR)  QUOTE(VAR)
 /* pefixes */
 
 const char def_funcion_prefix[] = "_f_";
@@ -129,24 +127,29 @@ const char cgen_sle[] =
 
 /* codegens flexiveis */
 
+/* codegen decfunc */
 const char codegen_decfunc[] =
-"%s%s:\n"
+"_f_%s:\n"
     "\tmove $fp, $sp\n"
     "\tsw $ra, 0($sp)\n"
     "\taddiu $sp, $sp, -4\n";
 
+//min of jumps on pop is 8 (fp and ra)
 const char codegen_decfunc_sufix[] =
-"return_label:\n"
+"end_function_%s:\n"
     "\tlw $ra, 4($sp)\n"
-    "\taddiu $sp, $sp, 8\n"
+    "\taddiu $sp, $sp, %d\n"
     "\tlw $fp 0($sp)\n"
     "\tj $ra\n";
 
+/* codegen funccall */
 const char codegen_funccall[] =
     "\tsw $fp, 0($sp)\n"
     "\taddiu $sp, $sp, -4\n";
 
 const char codegen_funccall_sufix[] =
     "\tjal _f_%s\n";
+
+/* codegen funccall */
 
 #endif

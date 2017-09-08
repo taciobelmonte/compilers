@@ -256,7 +256,7 @@ _f_main:
 	sw $a0, 0($sp)
 	addiu $sp, $sp, -4
 	jal _f_print
-return_label:
+end_function_main:
 	lw $ra, 4($sp)
 	addiu $sp, $sp, 8
 	lw $fp 0($sp)
