@@ -299,6 +299,7 @@ void createASTreeType(ASTNode *tree){
             break;
         case LLABELRETURN:
             caseExpression(tree, "return",1, 1);
+            //fprintf(yyout, codegen_return_token, last_function);
             break;
          case LSTMTIF:
             fprintf(yyout, " [if");
