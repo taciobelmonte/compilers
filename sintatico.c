@@ -30,6 +30,26 @@ typedef enum typesList {
     AST
 }type;
 
+typedef enum varLocation {
+    STACK,
+    DEFINITION,
+    NONDEF
+}varLocation;
+
+typedef enum varPurpose {
+    LOADUSE,
+    STORAGEUSE,
+    NONPURP
+}varPurpose;
+
+typedef struct nodeSym {
+    char *name;
+    varLocation location;
+}nodeSym;
+
+nodeSym tableSym[200];
+int qtdSym = 0;
+
 /*################ AST DEFINITIONS #####################*/
 #define BUFFERMAX 2000
 #define MAXCHAR 500
@@ -96,6 +116,9 @@ typedef struct ASTNo{
     type tipo;
     int args_total;
     int if_stmt_num;
+    int while_stmt_num;
+    int my_stack_position;
+    varPurpose purpose;
     union {
         nodeINT integer;
         nodeID id;
@@ -149,8 +172,10 @@ stringBuffer* lista     = NULL;
 
 //Declare functions
 ASTNode *allocINT(int valor);
-ASTNode *allocID(char string[MAXCHAR]);
+ASTNode *allocID(char string[MAXCHAR], varLocation l, varPurpose p);
 ASTNode *allocTreeNode(int no_token, int nfilhos, ...);
+void newSymbol(char string[MAXCHAR], varLocation l);
+void declareVars();
 void createNAryASTree(ASTNode *tree);
 void createASTreeType(ASTNode *tree);
 
@@ -161,10 +186,13 @@ ASTNode *allocINT(int valor) {
     newnode->integer.integer = valor;
     return newnode;
 }
-ASTNode *allocID(char string[MAXCHAR]) {
+ASTNode *allocID(char string[MAXCHAR], varLocation l, varPurpose p) {
     ASTNode *newnode = malloc(sizeof(ASTNode));
     newnode->tipo = ID;
     strcpy(newnode->id.name, string);
+    newnode->purpose = p;
+    if (l == DEFINITION || l == STACK)
+        newSymbol(string, l);
     return newnode;
 }
 ASTNode *allocTreeNode(int token, int totalkids, ...) {
@@ -189,6 +217,23 @@ ASTNode *allocTreeNode(int token, int totalkids, ...) {
 
     va_end(list);
     return newnode;
+}
+
+void newSymbol(char string[MAXCHAR], varLocation l)
+{
+    nodeSym newnode;
+    newnode.location = l;
+    strcpy(newnode.name, string);
+    tableSym[qtdSym] = newnode;
+    qtdSym++;
+}
+
+void declareVars()
+{
+    int i;
+    for(i=0; i<qtdSym ;i++)
+        if(tableSym[i].location == DEFINITION)
+            fprintf(yyout, codegen_variable, tableSym[i].name);
 }
 
 void createNAryASTree(ASTNode *tree)
@@ -358,9 +403,9 @@ void createASTreeType(ASTNode *tree){
         case LTIPAGEM:
             if( tree->tree.totalkids>=2){
                 if(tree->tree.kids[1]!= NULL) {
-                    fprintf(yyout, " [decvar ");
-                    fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
+                    fprintf(yyout, " [decvar [%s]", tree->tree.kids[0]->id.name);
                     createNAryASTree(tree->tree.kids[1]);
+                    //("\tsw $a0, var_%s\n", tree->tree.kids[0]->id.name)
                 } else {
                     fprintf(yyout, " [decvar [%s]]", tree->tree.kids[0]->id.name);
                 }
@@ -379,12 +424,12 @@ void createASTreeType(ASTNode *tree){
                 fprintf(yyout, codegen_decfunc_sufix, tree->tree.kids[0]->id.name, 8 + tree->args_total * 4);
                 break;
         case LPARAM:
-                fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
+                //fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
                 createNAryASTree(tree->tree.kids[1]);
-                fprintf(yyout, "]");
+                //fprintf(yyout, "]");
                 break;
         case LCOMPPARAM:
-                fprintf(yyout, " [%s]",tree->tree.kids[0]->id.name);
+                //fprintf(yyout, " [%s]",tree->tree.kids[0]->id.name);
                 createNAryASTree(tree->tree.kids[1]);
                 break;
         case LBLOCK:
@@ -398,13 +443,13 @@ void createASTreeType(ASTNode *tree){
                 //fprintf(yyout, "]");
                 break;
          case LASSIGNSTMT:
-                fprintf(yyout, " [assign ");
+                //fprintf(yyout, " [assign ");
                 createNAryASTree(tree->tree.kids[0]);
                 break;
          case LCOMPASSIGN:
-                fprintf(yyout, "[%s] ", tree->tree.kids[0]->id.name);
                 createNAryASTree(tree->tree.kids[1]);
-                fprintf(yyout, "]");
+                //TODO codegens pra quando %s é variavel ou está na pilha
+                fprintf(yyout, "\t%s = $a0\n", tree->tree.kids[0]->id.name);
                 break;
          case LBACK:
                 createNAryASTree(tree->tree.kids[0]);
@@ -544,36 +589,36 @@ void createASTreeType(ASTNode *tree){
 %%
 
 programa    :inicio                                                     {
-                                                                        //printf("[program])\n ");
+                                                                        printf("[program])\n ");
                                                                             createNAryASTree($1);
                                                                             COUNTER++;
                                                                         }
             ;
 inicio      : decvar inicio                                             {
-                                                                        //printf("2 (Decvar)\n ");
+                                                                        printf("2 (Decvar)\n ");
                                                                             $$ = allocTreeNode(LSTMT,2,$1,$2);
                                                                             COUNTER++;
                                                                         }
             | decfunc inicio                                            {
-                                                                        //printf("3- [decfunc]\n ");
+                                                                        printf("3- [decfunc]\n ");
                                                                            $$ = allocTreeNode(LSTMT, 2, $1, $2);
                                                                            COUNTER++;
                                                                         }
             |                                                           {$$ = NULL;}
             ;
 decvar      : LET IDENTIFIER loopatrib ENDEXPRESSION                    {
-                                                                        //printf("4 (let ) \n");
-                                                                          $$ = allocTreeNode(LTIPAGEM, 2, allocID($2), $3);
+                                                                        printf("4 (let ) \n");
+                                                                          $$ = allocTreeNode(LTIPAGEM, 2, allocID($2, DEFINITION, NONPURP), $3);
                                                                           COUNTER++;
                                                                         }
             ;
 loopatrib   : ASSIGN exp                                                {
-                                                                        //printf("4 (let x = ) \n");
+                                                                        printf("4 (let x = ) \n");
                                                                             $$ = allocTreeNode(LENDEXPRESSION, 1, $2);
                                                                             COUNTER++;
                                                                         }
             |                                                           {
-                                                                        //printf("4 (let x;)\n");
+                                                                        printf("4 (let x;)\n");
                                                                         $$ = NULL;
                                                                         }
             ;
@@ -581,10 +626,10 @@ decfunc     : DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco            {
                                                                           yyerror("print");
                                                                         }
             | DEF IDENTIFIER OPENPAR paramlist CLOSEPAR bloco           {
-                                                                        //printf("6-(decfunc (%s)) \n", $2);
+                                                                        printf("6-(decfunc (%s)) \n", $2);
                                                                         args_total = args;
                                                                         args=0;
-                                                                        $$ = allocTreeNode(LDEF,3, allocID($2), $4, $6);
+                                                                        $$ = allocTreeNode(LDEF,3, allocID($2, NONDEF, NONPURP), $4, $6);
 
                                                                         if(strcmp("main", $2) == 0){
                                                                             MAIN++;
@@ -595,91 +640,91 @@ decfunc     : DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco            {
             ;
 paramlist   :
              IDENTIFIER looparams                                       {
-                                                                        //printf("8-(paramlist loop)\n");
+                                                                        printf("8-(paramlist loop)\n");
                                                                         args++;
-                                                                        $$ = allocTreeNode(LPARAM, 2, allocID($1),$2);
+                                                                        $$ = allocTreeNode(LPARAM, 2, allocID($1, STACK, NONPURP), $2);
                                                                         COUNTER++;
                                                                         }
             |                                                           {
-                                                                        //printf("8-(no paramlist)\n");
+                                                                        printf("8-(no paramlist)\n");
                                                                         $$ = NULL;
                                                                         }
             ;
 looparams   : SEPARADOR IDENTIFIER looparams                            {
-                                                                        //printf("9-(,ID looparams) \n");
+                                                                        printf("9-(,ID looparams) \n");
                                                                         args++;
-                                                                        $$ = allocTreeNode(LCOMPPARAM, 2, allocID($2),$3);
+                                                                        $$ = allocTreeNode(LCOMPPARAM, 2, allocID($2, STACK, NONPURP), $3);
                                                                         COUNTER++;
                                                                         }
             |                                                           {$$ = NULL ;}
             ;
 bloco       :OPENBLOCK loopdecvar loopstmts CLOSEBLOCK                  {
-                                                                        //printf("10- [bloco] \n");
+                                                                        printf("10- [bloco] \n");
                                                                         $$ = allocTreeNode(LBLOCK, 3, $2, $3);
                                                                         COUNTER++;
                                                                         }
             ;
 loopdecvar  : decvar loopdecvar                                         {
-                                                                        //printf("11- (loopdecvar) \n");
+                                                                        printf("11- (loopdecvar) \n");
                                                                         $$ = allocTreeNode(LDECVAR, 2, $1, $2);
                                                                         COUNTER++;
                                                                         }
             |                                                           {$$ = NULL ;}
             ;
 loopstmts   : stmt loopstmts                                            {
-                                                                        //printf("12- (loop stmts)\n ");
+                                                                        printf("12- (loop stmts)\n ");
                                                                         $$ = allocTreeNode(LBACK, 2, $1, $2);
                                                                         COUNTER++;
                                                                         }
             |                                                           {$$ = NULL ;}
 
 stmt        : funccall ENDEXPRESSION                                    {
-                                                                        //printf("220- (funccall ;) \n");
+                                                                        printf("220- (funccall ;) \n");
                                                                         $$ = allocTreeNode(LSTATEMENTFUNCCALL, 1, $1);
                                                                         COUNTER++;
                                                                         }
             | assign ENDEXPRESSION                                      {
                                                                         $$ = allocTreeNode(LASSIGNSTMT, 1, $1);
-                                                                        //printf("220- (assign ;) \n");
+                                                                        printf("220- (assign ;) \n");
                                                                         COUNTER++;
                                                                         }
 
             | IF OPENPAR exp CLOSEPAR bloco                             {
-                                                                        //printf("15- if(exp){} \n");
+                                                                        printf("15- if(exp){} \n");
                                                                         if_stmt_num++;
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5);
                                                                         COUNTER++;
                                                                         }
             | IF OPENPAR exp CLOSEPAR bloco ELSE bloco                  {
-                                                                        //printf("15- if(exp)else{} \n");
+                                                                        printf("15- if(exp)else{} \n");
                                                                         if_stmt_num++;
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5, $7);
                                                                         COUNTER++;
                                                                         }
             | IF OPENPAR exp CLOSEPAR ELSE bloco                        {
-                                                                        //printf("15- if(exp)else{} \n");
+                                                                        printf("15- if(exp)else{} \n");
                                                                         if_stmt_num++;
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5, $6);
                                                                         COUNTER++;
                                                                         }
 
             | WHILE OPENPAR exp CLOSEPAR bloco                          {
-                                                                        //printf("16- while(exp){} \n");
+                                                                        printf("16- while(exp){} \n");
                                                                         $$ = allocTreeNode(LWHILE, 2, $3, $5);
                                                                         COUNTER++;
                                                                         }
             | RETURN loopexp ENDEXPRESSION                              {
-                                                                        //printf("17- return loopexp; \n");
+                                                                        printf("17- return loopexp; \n");
                                                                         $$ = allocTreeNode(LLABELRETURN, 1, $2);
                                                                         COUNTER++;
                                                                         }
             | BREAK ENDEXPRESSION                                       {
-                                                                        //printf("20 -break; \n");
+                                                                        printf("20 -break; \n");
                                                                         $$ = allocTreeNode(LLABELBREAK, 2, $1, $2);
                                                                         COUNTER++;
                                                                         }
             | CONTINUE ENDEXPRESSION                                    {
-                                                                        //printf("20 -continue; \n");
+                                                                        printf("20 -continue; \n");
                                                                         $$ = allocTreeNode(LLABELCONTINUE,2,$1, $2);
                                                                         COUNTER++;
                                                                         }
@@ -691,20 +736,20 @@ loopexp: exp                                                            {
         |                                                               {$$=NULL;}
         ;
 assign      : IDENTIFIER ASSIGN exp                                     {
-                                                                        //printf("23 x=exp \n");
+                                                                        printf("23 x=exp \n");
                                                                         //$$ = allocTreeNode(LASSIGNSTMT, 1, $1);
-                                                                        $$ = allocTreeNode(LCOMPASSIGN, 2, allocID($1), $3);
+                                                                        $$ = allocTreeNode(LCOMPASSIGN, 2, allocID($1, NONDEF, STORAGEUSE), $3);
                                                                         COUNTER++;
                                                                         }
             ;
 funccall    : IDENTIFIER OPENPAR arglist CLOSEPAR                       {
-                                                                        //printf("24- id() \n");
-                                                                        $$ = allocTreeNode(LFUNCCALL, 2, allocID($1), $3);
+                                                                        printf("24- id() \n");
+                                                                        $$ = allocTreeNode(LFUNCCALL, 2, allocID($1, NONDEF, NONPURP), $3);
                                                                         COUNTER++;
                                                                         }
             | PRINTAOLA OPENPAR arglist CLOSEPAR                        {
-                                                                        //printf("24- id() \n");
-                                                                        $$ = allocTreeNode(LFUNCCALL, 2, allocID($1), $3);
+                                                                        printf("24- id() \n");
+                                                                        $$ = allocTreeNode(LFUNCCALL, 2, allocID($1, NONDEF, NONPURP), $3);
                                                                         COUNTER++;
                                                                         }
             ;
@@ -717,100 +762,100 @@ arglist:
         ;
 
 loopargs     : exp loopargs2                                            {
-                                                                        //printf("26 - [] \n");
+                                                                        printf("26 - [] \n");
                                                                         $$ = allocTreeNode(LFUNCNNARGLIST, 2, $1, $2);
                                                                         COUNTER++;
                                                                         }
             ;
 loopargs2    : SEPARADOR exp loopargs2                                  {
-                                                                        //printf("27 - (, [%d]) \n", $2);
+                                                                         //printf("27 - (, [%d]) \n", $2);
                                                                          $$ = allocTreeNode(LFUNCNNARGLIST, 2, $2, $3);
                                                                          COUNTER++;
                                                                         }
             |                                                           {$$=NULL;}
             ;
 exp         : exp PLUS exp                                              {
-                                                                        //printf("28 - exp + exp \n");
+                                                                        printf("28 - exp + exp \n");
                                                                         $$ = allocTreeNode(LPLUS, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp MINUS exp                                             {
-                                                                        //printf("29 - exp - exp \n");
+                                                                        printf("29 - exp - exp \n");
                                                                         $$ = allocTreeNode(LMINUS, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp MULT exp                                              {
-                                                                        //printf("30 - exp * exp \n");
+                                                                        printf("30 - exp * exp \n");
                                                                         $$ = allocTreeNode(LMULT, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp DIV exp                                               {
-                                                                        //printf("31 - exp / exp \n");
+                                                                        printf("31 - exp / exp \n");
                                                                         $$ = allocTreeNode(LDIV, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp LESS exp                                              {
-                                                                        //printf("32 - exp < exp \n");
+                                                                        printf("32 - exp < exp \n");
                                                                         $$ = allocTreeNode(LLESS, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp LESSEQUAL exp                                         {
-                                                                        //printf("33 - exp <= exp \n");
+                                                                        printf("33 - exp <= exp \n");
                                                                         $$ = allocTreeNode(LLESSEQUAL, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp GREAT exp                                             {
-                                                                        //printf("34 - exp > exp \n");
+                                                                        printf("34 - exp > exp \n");
                                                                         $$ = allocTreeNode(LGREAT, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp GREATEQUAL exp                                        {
-                                                                        //printf("35 - exp >= exp \n");
+                                                                        printf("35 - exp >= exp \n");
                                                                         $$ = allocTreeNode(LGREATEQUAL, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp EQUAL exp                                             {
-                                                                        //printf("36 - exp = exp \n");
+                                                                        printf("36 - exp = exp \n");
                                                                         $$ = allocTreeNode(LEQUAL, 2, $1, $3);
                                                                         COUNTER++;
                                                                         }
             | exp DIFF exp                                              {
-                                                                        //printf("37 - exp != exp \n");
+                                                                        printf("37 - exp != exp \n");
                                                                         $$ = allocTreeNode(LDIFF, 2, $1, $3);COUNTER++;
                                                                         }
             | exp AND exp                                               {
-                                                                        //printf("38 - exp && exp \n");
+                                                                        printf("38 - exp && exp \n");
                                                                         $$ = allocTreeNode(LAND, 2, $1, $3);COUNTER++;
                                                                         }
             | exp OR exp                                                {
-                                                                        //printf("39 - exp || exp \n");
+                                                                        printf("39 - exp || exp \n");
                                                                         $$ = allocTreeNode(LOR, 2, $1, $3);COUNTER++;
                                                                         }
             | MINUS exp %prec UMINUS                                    {
-                                                                        //printf("40 - exp \n");
+                                                                        printf("40 - exp \n");
                                                                         $$ = allocTreeNode(LUMINUS, 1, $2);COUNTER++;
                                                                         }
             | NOT exp                                                   {
-                                                                        //printf("41 - !exp \n");
+                                                                        printf("41 - !exp \n");
                                                                         $$ = allocTreeNode(LNOT, 1, $2);COUNTER++;
                                                                         }
             | OPENPAR exp CLOSEPAR                                      {
-                                                                        //printf("42 - (exp) \n");
+                                                                        printf("42 - (exp) \n");
                                                                         $$ = allocTreeNode(LOPENPAR, 1, $2);COUNTER++;
                                                                         }
             | funccall                                                  {
-                                                                        //printf("43 - funccall\n");
+                                                                        printf("43 - funccall\n");
                                                                         $$ = allocTreeNode(LLABELFUNCCALL, 2, $1);
                                                                         COUNTER++;
                                                                         }
             | DEC                                                       {
-                                                                        //printf("44 dec\n ");
+                                                                        printf("44 dec\n ");
                                                                         $$ = allocINT($1);
                                                                         COUNTER++;
                                                                         }
             | IDENTIFIER                                                {
-                                                                        //printf("45 id\n ");
-                                                                        $$ = allocID($1);
+                                                                        printf("45 id\n ");
+                                                                        $$ = allocID($1, NONDEF, LOADUSE);
                                                                         COUNTER++;
                                                                         }
             ;
@@ -830,6 +875,8 @@ int main(int argc, char** argv) {
     yyin = input;
     yyout = output;
 
+    fprintf(yyout, mips_datas);
+    declareVars();
     fprintf(yyout, mips_head);
     fprintf(yyout, deff_print);
 

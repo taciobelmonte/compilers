@@ -9,8 +9,13 @@ const char global_var_prefix[] = "__";
 
 /* codegen templates */
 
+const char codegen_variable[] =
+"\tvar_%s: .word 0\n";
+
+const char mips_datas[] =
+".data\n\n";
+
 const char mips_head[] =
-".data\n\n"
 ".text\n\n";
 
 const char deff_print[] =
@@ -69,6 +74,20 @@ const char pop[] =
 
 const char load_int[] =
 "\tli $a0, %d\n";
+
+//ao chamar x tem que passar um inteiro referente a sua posição na pilha
+const char load_x[] =
+"\tlw $a0, %d($fp)\n";
+
+const char save_x[] =
+"\tsw $a0, %d($fp)\n";
+
+//ao chamar var tem que passar uma string com seu nome
+const char load_var[] =
+"\tlw $a0, var_%s\n";
+
+const char save_var[] =
+"\tsw $a0, var_%s\n";
 
 //onde %d deve ser passado como argumento, em função de quantos paramentro vieram na definicao
 //"\taddiu $sp, $sp, 8+4*%d\n";
