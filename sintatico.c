@@ -424,11 +424,9 @@ void createASTreeType(ASTNode *tree){
 
          case LSTATEMENTFUNCCALL:
                 //fprintf(yyout," [funccall ");
-                fprintf(yyout, codegen_funccall);
                 createNAryASTree(tree->tree.kids[0]);
                 //fprintf(yyout,"]");
                 //TODO tentar melhorar a chamada/definicao usada aqui, está mt verboso
-                fprintf(yyout, codegen_funccall_sufix, tree->tree.kids[0]->tree.kids[0]->id.name);
                 break;
 
         case LLABELFUNCCALL:
@@ -437,9 +435,11 @@ void createASTreeType(ASTNode *tree){
 
         case LFUNCCALL:
             if(tree->tree.kids[1] != NULL) {
+                fprintf(yyout, codegen_funccall);
                 //fprintf(yyout,"[%s]", tree->tree.kids[0]->id.name);
                 //TODO deal with this arglist
                 createNAryASTree(tree->tree.kids[1]);
+                fprintf(yyout, codegen_funccall_sufix, tree->tree.kids[0]->id.name);
             }else {
                 //fprintf(yyout,"[%s] ", tree->tree.kids[0]->id.name);
                 //fprintf(yyout,"[arglist]");
@@ -640,7 +640,7 @@ stmt        : funccall ENDEXPRESSION                                    {
                                                                         }
             | assign ENDEXPRESSION                                      {
                                                                         $$ = allocTreeNode(LASSIGNSTMT, 1, $1);
-                                                                        printf("220- (assign ;) \n");
+                                                                        //printf("220- (assign ;) \n");
                                                                         COUNTER++;
                                                                         }
 
