@@ -19,7 +19,10 @@ int COUNTER = 0;
 int ERRORS  = 0;
 int MAIN    = 0;
 int args    = 0;
-int args_total= 0;
+int args_total = 0;
+int if_stmt_num = 0;
+int while_stmt_num = 0;
+char last_function[MAXCHAR] = {'m', 'a', 'i', 'n'};
 
 typedef enum typesList {
     INT,
@@ -92,6 +95,7 @@ typedef struct {
 typedef struct ASTNo{
     type tipo;
     int args_total;
+    int if_stmt_num;
     union {
         nodeINT integer;
         nodeID id;
@@ -177,6 +181,8 @@ ASTNode *allocTreeNode(int token, int totalkids, ...) {
     newnode->tree.totalkids     = totalkids;
     if(token == LDEF)
         newnode->args_total = args_total;
+    if(token == LSTMTIF)
+        newnode->if_stmt_num = if_stmt_num;
 
     for(i =0; i < totalkids; i++)
          newnode->tree.kids[i] = va_arg(list, ASTNode*);
@@ -299,14 +305,20 @@ void createASTreeType(ASTNode *tree){
             break;
         case LLABELRETURN:
             caseExpression(tree, "return",1, 1);
-            //fprintf(yyout, codegen_return_token, last_function);
+            fprintf(yyout, codegen_return_token, last_function);
             break;
-         case LSTMTIF:
-            fprintf(yyout, " [if");
+        case LSTMTIF:
             createNAryASTree(tree->tree.kids[0]);
+            fprintf(yyout, codegen_if_comp, tree->if_stmt_num);
+            //check if else tree is null before call its codegen
+            if (tree->tree.kids[2] != NULL){
+                fprintf(yyout, codegen_false_branch, tree->if_stmt_num);
+                createNAryASTree(tree->tree.kids[2]);
+                fprintf(yyout, codegen_b_endif, tree->if_stmt_num);
+            }
+            fprintf(yyout, codegen_true_branch, tree->if_stmt_num, tree->if_stmt_num);
             createNAryASTree(tree->tree.kids[1]);
-            createNAryASTree(tree->tree.kids[2]);
-            fprintf(yyout, "]");
+            fprintf(yyout, codegen_endif, tree->if_stmt_num);
             break;
         case LIF:
             caseExpression(tree, "", 0, 0);
@@ -356,6 +368,7 @@ void createASTreeType(ASTNode *tree){
             break;
         case LDEF:
                 //fprintf(yyout, " [decfunc [%s]",tree->tree.kids[0]->id.name);
+                strcpy(last_function, tree->tree.kids[0]->id.name);
                 fprintf(yyout, codegen_decfunc, tree->tree.kids[0]->id.name);
                 //TODO proper codegen for paramlist of a function
                 createNAryASTree(tree->tree.kids[1]);
@@ -633,16 +646,19 @@ stmt        : funccall ENDEXPRESSION                                    {
 
             | IF OPENPAR exp CLOSEPAR bloco                             {
                                                                         //printf("15- if(exp){} \n");
+                                                                        if_stmt_num++;
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5);
                                                                         COUNTER++;
                                                                         }
             | IF OPENPAR exp CLOSEPAR bloco ELSE bloco                  {
                                                                         //printf("15- if(exp)else{} \n");
+                                                                        if_stmt_num++;
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5, $7);
                                                                         COUNTER++;
                                                                         }
             | IF OPENPAR exp CLOSEPAR ELSE bloco                        {
                                                                         //printf("15- if(exp)else{} \n");
+                                                                        if_stmt_num++;
                                                                         $$ = allocTreeNode(LSTMTIF, 3, $3, $5, $6);
                                                                         COUNTER++;
                                                                         }

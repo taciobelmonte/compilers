@@ -159,16 +159,16 @@ const char codegen_if_comp[] =
 "\tbnez $a0, true_branch_%d\n";
 
 const char codegen_false_branch[] =
-"false_branch_%d\n:";
+"false_branch_%d:\n";
 
 const char codegen_b_endif[] =
 "\tb end_if_%d\n";
 
 const char codegen_true_branch[] =
-"true_branch_%d\n:"
+"true_branch_%d:\n"
     "\tbeqz $a0, end_if_%d\n";
 
 const char codegen_endif[] =
-"end_if_%d\n:";
+"end_if_%d:\n";
 
 #endif
