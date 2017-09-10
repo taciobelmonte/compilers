@@ -42,12 +42,15 @@ typedef enum varLocation {
 typedef enum varPurpose {
     LOADUSE,
     STORAGEUSE,
+    ISSTACK,
+    ISLETDEF,
     NONPURP
 }varPurpose;
 
 typedef struct nodeSym {
     char name[MAXCHAR];
     varLocation location;
+    char myScope[MAXCHAR];
     int my_stack_position;
 }nodeSym;
 
@@ -180,7 +183,8 @@ ASTNode *allocINT(int valor);
 ASTNode *allocID(char string[MAXCHAR], varLocation l, varPurpose p);
 ASTNode *allocTreeNode(int no_token, int nfilhos, ...);
 void newSymbol(char string[MAXCHAR], varLocation l);
-nodeSym findVarContext(char string[MAXCHAR]);
+void fixTableScope(char string[MAXCHAR], varPurpose p);
+nodeSym findVarContext(char string[MAXCHAR], char scop[MAXCHAR]);
 void declareVars();
 void createNAryASTree(ASTNode *tree);
 void createASTreeType(ASTNode *tree);
@@ -199,6 +203,8 @@ ASTNode *allocID(char string[MAXCHAR], varLocation l, varPurpose p) {
     newnode->purpose = p;
     if (l == DEFINITION || l == STACK)
         newSymbol(string, l);
+    if (p == ISSTACK)
+        fixTableScope(string, p);
     return newnode;
 }
 ASTNode *allocTreeNode(int token, int totalkids, ...) {
@@ -233,6 +239,7 @@ void newSymbol(char string[MAXCHAR], varLocation l)
     newnode.location = l;
     newnode.my_stack_position = args;
     strcpy(newnode.name, string);
+    strcpy(newnode.myScope, "unidef");
     tableSym[qtdSym] = newnode;
     qtdSym++;
     //printf("qtdSym == %d\n", qtdSym);
@@ -243,12 +250,23 @@ void newSymbol(char string[MAXCHAR], varLocation l)
         //printf("STACK\n");
 }
 
-nodeSym findVarContext(char string[MAXCHAR])
+void fixTableScope(char string[MAXCHAR], varPurpose p)
+{
+    int i;
+    //TODO conferir quando tem mais de uma variavel com mesmo nome
+    for(i=0; i<qtdSym; i++)
+        if (!strcmp("unidef", tableSym[i].myScope) && tableSym[i].location == STACK && p == ISSTACK)
+            strcpy(tableSym[i].myScope, string);
+}
+
+nodeSym findVarContext(char string[MAXCHAR], char scop[MAXCHAR])
 {
     //printf("debug: estou procurando %s\n", string);
     int i;
     //TODO conferir quando tem mais de uma variavel com mesmo nome
     for(i=0; i<qtdSym && strcmp(string, tableSym[i].name); i++);
+    if(tableSym[i].location == STACK && strcmp(scop, tableSym[i].myScope))
+        for(i++; i<qtdSym && strcmp(string, tableSym[i].name); i++);
     return tableSym[i];
 
 }
@@ -286,7 +304,7 @@ void createNAryASTree(ASTNode *tree)
             //fprintf(yyout," [%s]", tree->id.name);
             //TODO refazer pra quando x esta na definição, e pra essa caso de pilha trocar o 4 por qdt de saltos pra cada
             nodeSym no;
-            no = findVarContext(tree->id.name);
+            no = findVarContext(tree->id.name, last_function);
             if(no.location == DEFINITION)
                 fprintf(yyout, load_var, tree->id.name);
             else
@@ -548,7 +566,7 @@ void createASTreeType(ASTNode *tree){
                 //TODO %s = $a0, tem q refazer pra quando %s está declarada, ao invés de pilha, além do numero de saltos
                 //fprintf(yyout, save_x, 4);
                 nodeSym no;
-                no = findVarContext(tree->tree.kids[0]->id.name);
+                no = findVarContext(tree->tree.kids[0]->id.name, last_function);
                 if(no.location == DEFINITION)
                     fprintf(yyout, save_var, no.name);
                 else
@@ -782,7 +800,7 @@ decfunc     : DEF PRINTAOLA OPENPAR paramlist CLOSEPAR bloco            {
                                                                         //printf("debug 6-(decfunc (%s)) \n", $2);
                                                                         args_total = args;
                                                                         args=0;
-                                                                        $$ = allocTreeNode(LDEF,3, allocID($2, NONDEF, NONPURP), $4, $6);
+                                                                        $$ = allocTreeNode(LDEF,3, allocID($2, NONDEF, ISSTACK), $4, $6);
 
                                                                         if(strcmp("main", $2) == 0){
                                                                             MAIN++;
