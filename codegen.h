@@ -31,8 +31,10 @@ const char deff_print[] =
     "\taddiu $sp, $sp, 4\n"
     "\tj $ra\n\n";
 
-const char call_main[] =
-"\nmain:\n"
+const char call_main1[] =
+"\nmain:\n";
+
+const char call_main2[] =
     "\tsw $fp, 0($sp)\n"
     "\taddiu $sp, $sp, -4\n"
     "\tjal _f_main\n"

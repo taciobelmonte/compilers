@@ -15,6 +15,8 @@ int yyparse();
 int yyerror(const char *);
 FILE *yyin;
 FILE *yyout;
+FILE *outrofile;
+int globalexp = 0;
 int COUNTER = 0;
 int ERRORS  = 0;
 int MAIN    = 0;
@@ -79,6 +81,7 @@ typedef enum keyList{
     LSTMTIF,
     LASSIGN,
     LENDEXPRESSION,
+    GLOBLENDEXPRESSION,
     LDECVAR,
     LEXP,
     LSTMTSTMT,
@@ -97,6 +100,7 @@ typedef enum keyList{
     LCOMPPARAM,
     LPARAM,
     LDEF,
+    GLOBLTIPAGEM,
     LTIPAGEM
 }keys;
 
@@ -418,6 +422,11 @@ void createASTreeType(ASTNode *tree){
              //aquitbm
              //fprintf(yyout, "]");
             break;
+        case GLOBLENDEXPRESSION:
+             createNAryASTree(tree->tree.kids[0]);
+             //aquitbm
+             //fprintf(yyout, "]");
+            break;
         case LDECVAR:
                 createNAryASTree(tree->tree.kids[0]);
                 if(tree->tree.kids[1] != NULL)
@@ -437,6 +446,22 @@ void createASTreeType(ASTNode *tree){
                     createNAryASTree(tree->tree.kids[1]);
                     //("\tsw $a0, var_%s\n", tree->tree.kids[0]->id.name)
                     fprintf(yyout, save_var, tree->tree.kids[0]->id.name);
+                } else {
+                    //aquitbm
+                    //fprintf(yyout, " [decvar [%s]]", tree->tree.kids[0]->id.name);
+                }
+            }
+            break;
+        case GLOBLTIPAGEM:
+            globalexp = 1;
+            if( tree->tree.totalkids>=2){
+                if(tree->tree.kids[1]!= NULL) {
+                    FILE *tempfile;
+                    tempfile = yyout;
+                    yyout = outrofile;
+                    createNAryASTree(tree->tree.kids[1]);
+                    fprintf(yyout, save_var, tree->tree.kids[0]->id.name);
+                    yyout = tempfile;
                 } else {
                     //aquitbm
                     //fprintf(yyout, " [decvar [%s]]", tree->tree.kids[0]->id.name);
@@ -618,6 +643,7 @@ void createASTreeType(ASTNode *tree){
 %type <ASTp> inicio
 %type <ASTp> exp
 %type <ASTp> programa
+%type <ASTp> globaldecvar
 %type <ASTp> decvar
 %type <ASTp> loopdecvar
 %type <ASTp> decfunc
@@ -630,6 +656,7 @@ void createASTreeType(ASTNode *tree){
 %type <ASTp> funccall
 %type <ASTp> arglist
 %type <ASTp> loopargs
+%type <ASTp> globalloopatrib
 %type <ASTp> loopatrib
 %type <ASTp> loopexp
 %type <ASTp> loopargs2
@@ -659,7 +686,7 @@ programa    :inicio                                                     {
                                                                             COUNTER++;
                                                                         }
             ;
-inicio      : decvar inicio                                             {
+inicio      : globaldecvar inicio                                             {
                                                                         //printf("debug 2 (Decvar)\n ");
                                                                             $$ = allocTreeNode(LSTMT,2,$1,$2);
                                                                             COUNTER++;
@@ -670,6 +697,22 @@ inicio      : decvar inicio                                             {
                                                                            COUNTER++;
                                                                         }
             |                                                           {$$ = NULL;}
+            ;
+globaldecvar : LET IDENTIFIER globalloopatrib ENDEXPRESSION        {
+                                                                        //printf("debug 4 (let ) \n");
+                                                                          $$ = allocTreeNode(GLOBLTIPAGEM, 2, allocID($2, DEFINITION, NONPURP), $3);
+                                                                          COUNTER++;
+                                                                        }
+            ;
+globalloopatrib : ASSIGN exp                                                {
+                                                                        //printf("debug 4 (let x = ) \n");
+                                                                            $$ = allocTreeNode(GLOBLENDEXPRESSION, 1, $2);
+                                                                            COUNTER++;
+                                                                        }
+            |                                                           {
+                                                                        //printf("debug 4 (let x;)\n");
+                                                                        $$ = NULL;
+                                                                        }
             ;
 decvar      : LET IDENTIFIER loopatrib ENDEXPRESSION                    {
                                                                         //printf("debug 4 (let ) \n");
@@ -936,6 +979,7 @@ int main(int argc, char** argv) {
 
     FILE *input  = fopen(argv[1], "r");
     FILE *output = fopen(argv[2], "w");
+    outrofile = fopen("secundario", "w");
 
     yyin = input;
     yyout = output;
@@ -943,7 +987,23 @@ int main(int argc, char** argv) {
     fprintf(yyout, mips_datas);
 
     yyparse();
-    fprintf(yyout, call_main);
+
+    fclose(outrofile);
+    fprintf(yyout, call_main1);
+
+    if(globalexp){
+        outrofile = fopen("secundario", "r");
+        fseek(outrofile, 0, SEEK_END);
+        long input_file_size = ftell(outrofile);
+        rewind(outrofile);
+        char *file_contents;
+        file_contents = malloc(input_file_size * (sizeof(char)));
+        fread(file_contents, sizeof(char), input_file_size, outrofile);
+        fclose(outrofile);
+        fprintf(yyout, file_contents);
+    }
+
+    fprintf(yyout, call_main2);
 
     fclose(input);
     fclose(output);
