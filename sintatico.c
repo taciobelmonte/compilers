@@ -253,6 +253,19 @@ nodeSym findVarContext(char string[MAXCHAR])
 
 }
 
+void essaEhMinhaTabela() {
+    int i;
+    for(i=0; i<qtdSym; i++){
+        if(tableSym[i].location == DEFINITION)
+            printf("definição");
+        if(tableSym[i].location == STACK)
+            printf("stack");
+        if(tableSym[i].location == NONDEF)
+            printf("nondef");
+        printf("\n");
+    }
+}
+
 void declareVars()
 {
     int i;
@@ -278,9 +291,11 @@ void createNAryASTree(ASTNode *tree)
                 fprintf(yyout, load_var, tree->id.name);
             else
                 fprintf(yyout, load_x, 4*no.my_stack_position);
+            //printf("load %s\n", tree->id.name);
         }else if(tree->tipo == INT){
             //fprintf(yyout," [%d]", tree->integer.integer);
             fprintf(yyout, load_int, tree->integer.integer);
+            //printf("load %d\n", tree->integer.integer);
         }
     }
 }
@@ -382,13 +397,16 @@ void createASTreeType(ASTNode *tree){
             break;
         case LWHILE:
             last_while = tree->while_stmt_num;
+            //printf("começando a while %d\n", last_while);
             fprintf(yyout, codegen_while_def, last_while);
             //evaluate exp
             createNAryASTree(tree->tree.kids[0]);
+            //printf("fez a exp cond do while %d\n", last_while);
             last_while = tree->while_stmt_num;
             fprintf(yyout, codegen_while_comp, last_while);
             //evaluate block
             createNAryASTree(tree->tree.kids[1]);
+            //printf("gerou o bloco do while %d\n", last_while);
             last_while = tree->while_stmt_num;
             fprintf(yyout, codegen_endwhile, last_while, last_while);
             //caseExpression(tree, "while",0, 1);
@@ -398,16 +416,22 @@ void createASTreeType(ASTNode *tree){
             fprintf(yyout, codegen_return_token, last_function);
             break;
         case LSTMTIF:
+            //printf("começando codegen de if%d\n", tree->if_stmt_num);
             createNAryASTree(tree->tree.kids[0]);
+            //printf("codegenerou a comp exp de if%d\n", tree->if_stmt_num);
             fprintf(yyout, codegen_if_comp, tree->if_stmt_num);
             //check if else tree is null before call its codegen
             if (tree->tree.kids[2] != NULL){
+                //printf("antes do else de if%d\n", tree->if_stmt_num);
                 fprintf(yyout, codegen_false_branch, tree->if_stmt_num);
                 createNAryASTree(tree->tree.kids[2]);
                 fprintf(yyout, codegen_b_endif, tree->if_stmt_num);
+                //printf("codegenerou o else de if%d\n", tree->if_stmt_num);
             }
+            //printf("antes do trueb de if%d\n", tree->if_stmt_num);
             fprintf(yyout, codegen_true_branch, tree->if_stmt_num, tree->if_stmt_num);
             createNAryASTree(tree->tree.kids[1]);
+            //printf("codegenerou o trueb de if%d\n", tree->if_stmt_num);
             fprintf(yyout, codegen_endif, tree->if_stmt_num);
             break;
         case LIF:
@@ -484,14 +508,17 @@ void createASTreeType(ASTNode *tree){
         case LDEF:
                 //fprintf(yyout, " [decfunc [%s]",tree->tree.kids[0]->id.name);
                 strcpy(last_function, tree->tree.kids[0]->id.name);
+                //printf("começando a definir %s\n", last_function);
                 fprintf(yyout, codegen_decfunc, tree->tree.kids[0]->id.name);
                 //TODO proper codegen for paramlist of a function
                 createNAryASTree(tree->tree.kids[1]);
+                //printf("codegenerei os params de %s\n", last_function);
                 //if(tree->tree.kids[1] == NULL)
                 //    fprintf(yyout, " [paramlist]");
                 createNAryASTree(tree->tree.kids[2]);
                 //fprintf(yyout, "]");
                 fprintf(yyout, codegen_decfunc_sufix, tree->tree.kids[0]->id.name, 8 + tree->args_total * 4);
+                //printf("terminei de definir %s\n", last_function);
                 break;
         case LPARAM:
                 //fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
@@ -547,6 +574,7 @@ void createASTreeType(ASTNode *tree){
                 break;
          case LLABELBREAK:
                 //fprintf(yyout, " [break]");
+                //printf("fiz um break\n");
                 fprintf(yyout, codegen_break, last_while);
                 break;
          case LSTMTELSE:
@@ -595,11 +623,11 @@ void createASTreeType(ASTNode *tree){
             fprintf(yyout, push_a0); //TODO conferir com tacio se está certo
             /*
             if (tree->tree.kids[0]->tipo == ID)
-                printf("debug [%s]\n", tree->tree.kids[0]->id.name);
+                //printf("debug [%s]\n", tree->tree.kids[0]->id.name);
             if (tree->tree.kids[0]->tipo == INT)
-                printf("debug [%d]\n", tree->tree.kids[0]->integer.integer);
+                //printf("debug [%d]\n", tree->tree.kids[0]->integer.integer);
             if (tree->tree.kids[0]->tipo == AST)
-                printf("debug ast\n");
+                //printf("debug ast\n");
             */
 
             //quando chega no LFUNCNNARGLIST é pq tem pelomenos um argumento, aí so empilha o primeiro, se tiver mais
@@ -694,6 +722,9 @@ void createASTreeType(ASTNode *tree){
 programa    :inicio                                                     {
                                                                         //printf("debug [program])\n ");
                                                                             declareVars();
+                                                                            //essaEhMinhaTabela();
+                                                                            //printf("consegui declarar\n");
+                                                                            //fclose(yyout);
                                                                             fprintf(yyout, mips_head);
                                                                             fprintf(yyout, deff_print);
                                                                             createNAryASTree($1);
@@ -814,7 +845,7 @@ stmt        : funccall ENDEXPRESSION                                    {
             | IF OPENPAR exp CLOSEPAR bloco                             {
                                                                         //printf("debug 15- if(exp){} \n");
                                                                         if_stmt_num++;
-                                                                        $$ = allocTreeNode(LSTMTIF, 3, $3, $5);
+                                                                        $$ = allocTreeNode(LSTMTIF, 2, $3, $5);
                                                                         COUNTER++;
                                                                         }
             | IF OPENPAR exp CLOSEPAR bloco ELSE bloco                  {
