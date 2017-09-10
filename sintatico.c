@@ -385,9 +385,11 @@ void createASTreeType(ASTNode *tree){
             fprintf(yyout, codegen_while_def, last_while);
             //evaluate exp
             createNAryASTree(tree->tree.kids[0]);
+            last_while = tree->while_stmt_num;
             fprintf(yyout, codegen_while_comp, last_while);
             //evaluate block
             createNAryASTree(tree->tree.kids[1]);
+            last_while = tree->while_stmt_num;
             fprintf(yyout, codegen_endwhile, last_while, last_while);
             //caseExpression(tree, "while",0, 1);
             break;
