@@ -1,0 +1,374 @@
+.data
+
+.text
+
+_f_print:
+	lw $a0, 4($sp)
+	li $v0, 1
+	syscall
+	li $v0, 11
+	li $a0, 0x0a
+	syscall
+	addiu $sp, $sp, 4
+	lw $fp, 4($sp)
+	addiu $sp, $sp, 4
+	j $ra
+
+_f_main:
+	move $fp, $sp
+	sw $ra, 0($sp)
+	addiu $sp, $sp, -4
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 5
+	sltiu $a0, $a0, 1
+	sltiu $a0, $a0, 1
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 0
+	sltiu $a0, $a0, 1
+	sltiu $a0, $a0, 1
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 3
+	sltiu $a0, $a0, 1
+	sltiu $a0, $a0, 1
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 5
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 12
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	add $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 1
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 3
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 5
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	mul $a0, $t1, $a0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 3
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 3
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 10
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	mul $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 4
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 100
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	mul $a0, $t1, $a0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	add $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 1
+	sltiu $a0, $a0, 1
+	sltiu $a0, $a0, 1
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	slt $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 1
+	negu $a0, $a0
+	sltiu $a0, $a0, 1
+	sltiu $a0, $a0, 1
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 59
+	sltiu $a0, $a0, 1
+	negu $a0, $a0
+	sltiu $a0, $a0, 1
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 1
+	sltiu $a0, $a0, 1
+	sltiu $a0, $a0, 1
+	negu $a0, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 0
+	sltiu $a0, $a0, 1
+	sltiu $a0, $a0, 1
+	negu $a0, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 49
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 37
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 5
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	add $a0, $t1, $a0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	or $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 201841
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 128
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 120912
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	mul $a0, $t1, $a0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	add $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 18102
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 1
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	or $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 5
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 100
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	div $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 2
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	or $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 491
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 5
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	seq $a0, $t1, $a0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	or $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 491
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 5
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	sne $a0, $t1, $a0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	or $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 91201
+	sltiu $a0, $a0, 1
+	sltiu $a0, $a0, 1
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 121912
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	sub $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 9021902
+	sltiu $a0, $a0, 1
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	add $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 491022
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 192
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 19219
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	or $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 1212
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 500
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	add $a0, $t1, $a0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 50120
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 129021
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	and $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	li $a0, 2
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	or $a0, $t1, $a0
+	sne $a0, $a0, $0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	add $a0, $t1, $a0
+	lw $t1, 4($sp)
+	addiu $sp, $sp, 4
+	or $a0, $t1, $a0
+	sne $a0, $a0, $0
+	sw $a0, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_print
+return_label:
+	lw $ra, 4($sp)
+	addiu $sp, $sp, 8
+	lw $fp 0($sp)
+	j $ra
+
+main:
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	sw $fp, 0($sp)
+	addiu $sp, $sp, -4
+	jal _f_main
+	li $v0, 10
+	syscall
