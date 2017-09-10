@@ -25,6 +25,7 @@ int args_total = 0;
 int if_stmt_num = 0;
 int while_stmt_num = 0;
 char last_function[MAXCHAR] = {'m', 'a', 'i', 'n'};
+int last_while = 0;
 
 typedef enum typesList {
     INT,
@@ -216,6 +217,8 @@ ASTNode *allocTreeNode(int token, int totalkids, ...) {
         newnode->args_total = args_total;
     if(token == LSTMTIF)
         newnode->if_stmt_num = if_stmt_num;
+    if(token == LWHILE)
+        newnode->while_stmt_num = while_stmt_num;
 
     for(i =0; i < totalkids; i++)
          newnode->tree.kids[i] = va_arg(list, ASTNode*);
@@ -378,7 +381,15 @@ void createASTreeType(ASTNode *tree){
             fprintf(yyout, cgen_sneq);
             break;
         case LWHILE:
-            caseExpression(tree, "while",0, 1);
+            last_while = tree->while_stmt_num;
+            fprintf(yyout, codegen_while_def, last_while);
+            //evaluate exp
+            createNAryASTree(tree->tree.kids[0]);
+            fprintf(yyout, codegen_while_comp, last_while);
+            //evaluate block
+            createNAryASTree(tree->tree.kids[1]);
+            fprintf(yyout, codegen_endwhile, last_while, last_while);
+            //caseExpression(tree, "while",0, 1);
             break;
         case LLABELRETURN:
             caseExpression(tree, "return",1, 1);
@@ -534,6 +545,7 @@ void createASTreeType(ASTNode *tree){
                 break;
          case LLABELBREAK:
                 //fprintf(yyout, " [break]");
+                fprintf(yyout, codegen_break, last_while);
                 break;
          case LSTMTELSE:
                 createNAryASTree(tree->tree.kids[0]);
@@ -818,6 +830,7 @@ stmt        : funccall ENDEXPRESSION                                    {
 
             | WHILE OPENPAR exp CLOSEPAR bloco                          {
                                                                         //printf("debug 16- while(exp){} \n");
+                                                                        while_stmt_num++;
                                                                         $$ = allocTreeNode(LWHILE, 2, $3, $5);
                                                                         COUNTER++;
                                                                         }

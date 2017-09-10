@@ -190,4 +190,23 @@ const char codegen_true_branch[] =
 const char codegen_endif[] =
 "end_if_%d:\n";
 
+/* codegen from while statments */
+
+const char codegen_while_def[] =
+"while_%d:               #while stmt\n"
+    "\t# while comp exp\n";
+
+const char codegen_while_comp[] =
+"\tbeqz $a0, end_while_%d           #if exp == 0 fim\n";
+
+const char codegen_endwhile[] =
+"\tb while_%d            #branch to loop\n"
+"end_while_%d:           #fim while\n";
+
+const char codegen_break[] =
+"\tb end_while_%d\n";
+
+
+
+
 #endif
