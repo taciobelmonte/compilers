@@ -238,7 +238,7 @@ void newSymbol(char string[MAXCHAR], varLocation l)
 
 nodeSym findVarContext(char string[MAXCHAR])
 {
-    printf("debug: estou procurando %s\n", string);
+    //printf("debug: estou procurando %s\n", string);
     int i;
     //TODO conferir quando tem mais de uma variavel com mesmo nome
     for(i=0; i<qtdSym && strcmp(string, tableSym[i].name); i++);
@@ -808,7 +808,7 @@ assign      : IDENTIFIER ASSIGN exp                                     {
                                                                         }
             ;
 funccall    : IDENTIFIER OPENPAR arglist CLOSEPAR                       {
-                                                                        printf("debug 24- %s() \n", $1);
+                                                                        //printf("debug 24- %s() \n", $1);
                                                                         $$ = allocTreeNode(LFUNCCALL, 2, allocID($1, NONDEF, NONPURP), $3);
                                                                         COUNTER++;
                                                                         }
