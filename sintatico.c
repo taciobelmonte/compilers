@@ -197,7 +197,7 @@ void createNAryASTree(ASTNode *tree)
         if(tree->tipo == AST){
             createASTreeType(tree);
         }else if(tree->tipo == ID){
-            fprintf(yyout," [%s]", tree->id.name);
+            //fprintf(yyout," [%s]", tree->id.name);
         }else if(tree->tipo == INT){
             //fprintf(yyout," [%d]", tree->integer.integer);
             fprintf(yyout, load_int, tree->integer.integer);
@@ -336,13 +336,14 @@ void createASTreeType(ASTNode *tree){
             break;
         case LASSIGN:
             createNAryASTree(tree->tree.kids[0]);
-            fprintf(yyout, " [assign ");
-            fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
-            fprintf(yyout, "]");
+            //fprintf(yyout, " [assign ");
+            //fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
+            //fprintf(yyout, "]");
             break;
         case LENDEXPRESSION:
              createNAryASTree(tree->tree.kids[0]);
-             fprintf(yyout, "]");
+             //aquitbm
+             //fprintf(yyout, "]");
             break;
         case LDECVAR:
                 createNAryASTree(tree->tree.kids[0]);
@@ -358,11 +359,13 @@ void createASTreeType(ASTNode *tree){
         case LTIPAGEM:
             if( tree->tree.totalkids>=2){
                 if(tree->tree.kids[1]!= NULL) {
-                    fprintf(yyout, " [decvar ");
-                    fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
+                    //aquitbm
+                    //fprintf(yyout, " [decvar ");
+                    //fprintf(yyout, "[%s]", tree->tree.kids[0]->id.name);
                     createNAryASTree(tree->tree.kids[1]);
                 } else {
-                    fprintf(yyout, " [decvar [%s]]", tree->tree.kids[0]->id.name);
+                    //aquitbm
+                    //fprintf(yyout, " [decvar [%s]]", tree->tree.kids[0]->id.name);
                 }
             }
             break;
@@ -379,12 +382,12 @@ void createASTreeType(ASTNode *tree){
                 fprintf(yyout, codegen_decfunc_sufix, tree->tree.kids[0]->id.name, 8 + tree->args_total * 4);
                 break;
         case LPARAM:
-                fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
+                //fprintf(yyout, " [paramlist [%s]",tree->tree.kids[0]->id.name);
                 createNAryASTree(tree->tree.kids[1]);
-                fprintf(yyout, "]");
+                //fprintf(yyout, "]");
                 break;
         case LCOMPPARAM:
-                fprintf(yyout, " [%s]",tree->tree.kids[0]->id.name);
+                //fprintf(yyout, " [%s]",tree->tree.kids[0]->id.name);
                 createNAryASTree(tree->tree.kids[1]);
                 break;
         case LBLOCK:
@@ -398,13 +401,13 @@ void createASTreeType(ASTNode *tree){
                 //fprintf(yyout, "]");
                 break;
          case LASSIGNSTMT:
-                fprintf(yyout, " [assign ");
+                //fprintf(yyout, " [assign ");
                 createNAryASTree(tree->tree.kids[0]);
                 break;
          case LCOMPASSIGN:
-                fprintf(yyout, "[%s] ", tree->tree.kids[0]->id.name);
+                //fprintf(yyout, "[%s] ", tree->tree.kids[0]->id.name);
                 createNAryASTree(tree->tree.kids[1]);
-                fprintf(yyout, "]");
+                //fprintf(yyout, "]");
                 break;
          case LBACK:
                 createNAryASTree(tree->tree.kids[0]);
@@ -412,13 +415,13 @@ void createASTreeType(ASTNode *tree){
                     createNAryASTree(tree->tree.kids[1]);
                 break;
          case LLABELBREAK:
-                fprintf(yyout, " [break]");
+                //fprintf(yyout, " [break]");
                 break;
          case LSTMTELSE:
                 createNAryASTree(tree->tree.kids[0]);
                 break;
          case LLABELCONTINUE:
-                fprintf(yyout," [continue]");
+                //fprintf(yyout," [continue]");
                 break;
 
 
