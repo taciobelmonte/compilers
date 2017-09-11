@@ -205,8 +205,11 @@ ASTNode *allocID(char string[MAXCHAR], varLocation l, varPurpose p) {
         newSymbol(string, l);
     if (p == ISSTACK)
         fixTableScope(string, p);
+    if (p == ISLETDEF)
+        fixTableScope("letdef", p);
     return newnode;
 }
+
 ASTNode *allocTreeNode(int token, int totalkids, ...) {
     int i = 0;
     va_list list;
@@ -253,9 +256,11 @@ void newSymbol(char string[MAXCHAR], varLocation l)
 void fixTableScope(char string[MAXCHAR], varPurpose p)
 {
     int i;
-    //TODO conferir quando tem mais de uma variavel com mesmo nome
     for(i=0; i<qtdSym; i++)
         if (!strcmp("unidef", tableSym[i].myScope) && tableSym[i].location == STACK && p == ISSTACK)
+            strcpy(tableSym[i].myScope, string);
+        else
+            if (!strcmp("unidef", tableSym[i].myScope) && tableSym[i].location == DEFINITION && p == ISLETDEF)
             strcpy(tableSym[i].myScope, string);
 }
 
@@ -266,6 +271,8 @@ nodeSym findVarContext(char string[MAXCHAR], char scop[MAXCHAR])
     //TODO conferir quando tem mais de uma variavel com mesmo nome
     for(i=0; i<qtdSym && strcmp(string, tableSym[i].name); i++);
     if(tableSym[i].location == STACK && strcmp(scop, tableSym[i].myScope))
+        for(i++; i<qtdSym && strcmp(string, tableSym[i].name); i++);
+    if(tableSym[i].location == DEFINITION && strcmp("letdef", tableSym[i].myScope))
         for(i++; i<qtdSym && strcmp(string, tableSym[i].name); i++);
     return tableSym[i];
 
@@ -639,6 +646,7 @@ void createASTreeType(ASTNode *tree){
         case LFUNCNNARGLIST:
             createNAryASTree( tree->tree.kids[0] );
             fprintf(yyout, push_a0); //TODO conferir com tacio se está certo
+            createNAryASTree( tree->tree.kids[1] );
             /*
             if (tree->tree.kids[0]->tipo == ID)
                 //printf("debug [%s]\n", tree->tree.kids[0]->id.name);
@@ -650,7 +658,6 @@ void createASTreeType(ASTNode *tree){
 
             //quando chega no LFUNCNNARGLIST é pq tem pelomenos um argumento, aí so empilha o primeiro, se tiver mais
             //a recussão da conta por si só
-            createNAryASTree( tree->tree.kids[1] );
             break;
 
     }
@@ -761,13 +768,13 @@ inicio      : globaldecvar inicio                                             {
                                                                         }
             |                                                           {$$ = NULL;}
             ;
-globaldecvar : LET IDENTIFIER globalloopatrib ENDEXPRESSION        {
+globaldecvar : LET IDENTIFIER globalloopatrib ENDEXPRESSION             {
                                                                         //printf("debug 4 (let ) \n");
-                                                                          $$ = allocTreeNode(GLOBLTIPAGEM, 2, allocID($2, DEFINITION, NONPURP), $3);
+                                                                          $$ = allocTreeNode(GLOBLTIPAGEM, 2, allocID($2, DEFINITION, ISLETDEF), $3);
                                                                           COUNTER++;
                                                                         }
             ;
-globalloopatrib : ASSIGN exp                                                {
+globalloopatrib : ASSIGN exp                                            {
                                                                         //printf("debug 4 (let x = ) \n");
                                                                             $$ = allocTreeNode(GLOBLENDEXPRESSION, 1, $2);
                                                                             COUNTER++;
@@ -779,7 +786,7 @@ globalloopatrib : ASSIGN exp                                                {
             ;
 decvar      : LET IDENTIFIER loopatrib ENDEXPRESSION                    {
                                                                         //printf("debug 4 (let ) \n");
-                                                                          $$ = allocTreeNode(LTIPAGEM, 2, allocID($2, DEFINITION, NONPURP), $3);
+                                                                          $$ = allocTreeNode(LTIPAGEM, 2, allocID($2, DEFINITION, ISLETDEF), $3);
                                                                           COUNTER++;
                                                                         }
             ;
