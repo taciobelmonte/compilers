@@ -2,7 +2,6 @@ CC=gcc
 CFLAGS=-I.
 
 all:
-	cp sintatico.c sintatico.y
 	bison -d -t sintatico.y  -v
 	mv sintatico.tab.h sintatico.h
 	mv sintatico.tab.c sintatico.y.c
