@@ -1,0 +1,13 @@
+let a;
+
+def main() {
+    if (a == 10) {
+        print(a);
+    }
+    else {
+        a = a + 1;
+        main();
+        print(a);
+    }
+}
+

@@ -9,9 +9,14 @@ const char global_var_prefix[] = "__";
 
 /* codegen templates */
 
+const char codegen_variable[] =
+"\tvar_%s: .word 0\n";
+
+const char mips_datas[] =
+".data\n";
+
 const char mips_head[] =
-".data\n\n"
-".text\n\n";
+"\n.text\n\n";
 
 const char deff_print[] =
 "_f_print:\n"
@@ -26,10 +31,10 @@ const char deff_print[] =
     "\taddiu $sp, $sp, 4\n"
     "\tj $ra\n\n";
 
-const char call_main[] =
-"\nmain:\n"
-    "\tsw $fp, 0($sp)\n"
-    "\taddiu $sp, $sp, -4\n"
+const char call_main1[] =
+"\nmain:\n";
+
+const char call_main2[] =
     "\tsw $fp, 0($sp)\n"
     "\taddiu $sp, $sp, -4\n"
     "\tjal _f_main\n"
@@ -70,6 +75,20 @@ const char pop[] =
 const char load_int[] =
 "\tli $a0, %d\n";
 
+//ao chamar x tem que passar um inteiro referente a sua posição na pilha
+const char load_x[] =
+"\tlw $a0, %d($fp)          #load x\n";
+
+const char save_x[] =
+"\tsw $a0, %d($fp)          #save x\n";
+
+//ao chamar var tem que passar uma string com seu nome
+const char load_var[] =
+"\tlw $a0, var_%s           #load var\n";
+
+const char save_var[] =
+"\tsw $a0, var_%s           #save var\n";
+
 //onde %d deve ser passado como argumento, em função de quantos paramentro vieram na definicao
 //"\taddiu $sp, $sp, 8+4*%d\n";
 const char pop_paramlis[] =
@@ -97,11 +116,15 @@ const char cgen_mul[] =
 const char cgen_div[] =
 "\tdiv $a0, $t1, $a0\n";
 
+//if some operand is zero, return zero
 const char cgen_and[] =
+"\tsne $a0, $a0, $0\n"
+"\tsne $t1, $t1, $0\n"
 "\tand $a0, $t1, $a0\n";
 
 const char cgen_or[] =
-"\tor $a0, $t1, $a0\n";
+"\tor $a0, $t1, $a0\n"
+"\tsne $a0, $a0, $0\n";
 
 const char cgen_sgt[] =
 "\tsgt $a0, $t1, $a0\n";
@@ -123,23 +146,67 @@ const char cgen_sle[] =
 
 /* codegens flexiveis */
 
+/* codegen decfunc */
 const char codegen_decfunc[] =
-"%s%s:\n"
+"_f_%s:\n"
     "\tmove $fp, $sp\n"
     "\tsw $ra, 0($sp)\n"
     "\taddiu $sp, $sp, -4\n";
 
+//min of jumps on pop is 8 (fp and ra)
 const char codegen_decfunc_sufix[] =
+"end_function_%s:\n"
     "\tlw $ra, 4($sp)\n"
-    "\taddiu $sp, $sp, 8\n"
+    "\taddiu $sp, $sp, %d\n"
     "\tlw $fp 0($sp)\n"
     "\tj $ra\n";
 
+const char codegen_return_token[] =
+"\tb end_function_%s\n";
+
+/* codegen funccall */
 const char codegen_funccall[] =
-    "\tsw $fp, 0($sp)\n"
+    "\tsw $fp, 0($sp)           #comeca empilhar fp pra comecar uma call\n"
     "\taddiu $sp, $sp, -4\n";
 
 const char codegen_funccall_sufix[] =
     "\tjal _f_%s\n";
+
+/* codegen from ifs statments */
+
+const char codegen_if_comp[] =
+"\tbnez $a0, true_branch_%d\n";
+
+const char codegen_false_branch[] =
+"false_branch_%d:\n";
+
+const char codegen_b_endif[] =
+"\tb end_if_%d\n";
+
+const char codegen_true_branch[] =
+"true_branch_%d:\n"
+    "\tbeqz $a0, end_if_%d\n";
+
+const char codegen_endif[] =
+"end_if_%d:\n";
+
+/* codegen from while statments */
+
+const char codegen_while_def[] =
+"while_%d:               #while stmt\n"
+    "\t# while comp exp\n";
+
+const char codegen_while_comp[] =
+"\tbeqz $a0, end_while_%d           #if exp == 0 fim\n";
+
+const char codegen_endwhile[] =
+"\tb while_%d            #branch to loop\n"
+"end_while_%d:           #fim while\n";
+
+const char codegen_break[] =
+"\tb end_while_%d\n";
+
+
+
 
 #endif
