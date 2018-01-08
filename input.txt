@@ -1,5 +1,0 @@
-def main()
-{
-    let a;
-    a = 3;
-}
